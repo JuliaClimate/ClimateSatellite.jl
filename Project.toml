@@ -1,0 +1,13 @@
+name = "ClimateSatellite"
+uuid = "d91beb5f-3141-4656-855d-efd5d97b23c4"
+authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
