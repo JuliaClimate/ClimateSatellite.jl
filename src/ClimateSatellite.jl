@@ -15,7 +15,7 @@ end
 
 ## Exporting the following functions:
 export
-        #clisatroot,
+        clisatroot,
         mimicroot, mimiclonlat, mimicfile, mimicfol,
         mimicdt, mimicget, mimicdwn, mimicextract, mimicsave, mimicrmtmp,
         gpmroot, gpmlonlat, gpmncfile, gpmhdf5, gpmfol,
@@ -24,13 +24,13 @@ export
         mimicrun, gpmrun
 
 ## Including other files in the module
-include("clisatinit.jl")
+#include("clisatinit.jl")
 
 include("gpm.jl")
-include("trmm.jl")
+#include("trmm.jl")
 
 include("mimic.jl")
-include("modis.jl")
-include("rss.jl")
+#include("modis.jl")
+#include("rss.jl")
 
 end # module

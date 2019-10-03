@@ -51,7 +51,7 @@ function gpmhdf5(date)
 
 end
 
-function gpmfol(reg::AbstractString="GLB",date::Date,sroot::AbstractString)
+function gpmfol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
     fol = "$(sroot)/$(reg)/$(yr2str(date))/$(mo2str(date))/"
     if !isdir(fol)
         notice(logger,"GPM data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist.");
