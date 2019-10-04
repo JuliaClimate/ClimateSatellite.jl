@@ -1,19 +1,22 @@
 """
-This file contains all the functions that are used in the retrieval of GPM
-precipitable water datasets.  This includes the downloading and and retrieval
-data from specific areas, as well as plotting of the data.
+    This file contains all the functions that are used in the retrieval of GPM
+    precipitable water datasets.  Current functionalities include:
+        - downloading of raw data files
+        - extraction of regional data (where applicable)
+        - saving of data (global/regional)
 
--- gpmdwn(date,region="GLB",root)
-    downloads hour gridded precipitable water for a given date (and if
-    specified, region)
--- gpmdt(date)
-    extracts the year, month and day and generates:
-    -- a list of files to download
-    -- the url where the files are to be downloaded from
-
+    The following functionalities are forthcoming:
+        - preliminary mapping of data
 """
 
 # Setup Functions
+
+"""
+    gpmroot(root) -> AbstractString
+
+    Returns the path where GPM data will be downloaded and stored based on the
+    given input "root", which must be a string
+"""
 function gpmroot(root::AbstractString)
     info(logger,"Making root folder for GPM datasets.")
     sroot = "$(root)/GPM/"; mkpath(sroot)
@@ -25,15 +28,36 @@ function gpmroot(root::AbstractString)
     return sroot
 end
 
+"""
+    gpmlonlat() -> Array,Array
+
+    Returns two vector arrays for the longitude and latitude respectively.
+    Longitude defaults are within [-180,180].  Grid spacing 0.1 x 0.1.
+    Measurements are taken in the middle of grid points, therefore at .05º
+    No inputs are required.
+"""
 function gpmlonlat()
     lon = convert(Array,-179.95:0.1:179.95); lat = convert(Array,-89.95:0.1:89.95);
     return lon,lat
 end
 
+"""
+    gpmncfile(date,reg) -> AbstractString
+
+    Returns the ncfile name that the data extracted will be saved to, based on
+    given date and region variable inputs.
+"""
 function gpmncfile(date::Date,reg::AbstractString)
     return "gpm_$(reg)_prcp_$(Date(date)).nc"
 end
 
+"""
+    gpmhdf5(date) -> Array{String}
+
+    Returns an array of strings that contain the names of the raw HDF5 files for
+    a given date input.  This array contains 48 different names, because GPM
+    saves data every 30 minutes.
+"""
 function gpmhdf5(date)
 
     fname = Array{String}(undef,48)
@@ -51,8 +75,15 @@ function gpmhdf5(date)
 
 end
 
+"""
+    gpmfol(date,root,reg) -> AbstractString
+
+    Returns a string that is the path to which the extracted data will be saved.
+    If folder does not exist, then the data directory will be created.
+    Default value for "reg" is GLB (i.e. global).
+"""
 function gpmfol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
-    fol = "$(sroot)/$(reg)/$(yr2str(date))/$(mo2str(date))/"
+    fol = "$(sroot)/$(reg)/$(yrmo2dir(date))/"
     if !isdir(fol)
         notice(logger,"GPM data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist.");
         info(logger,"Creating data directory $(fol)."); mkpath(fol);
@@ -61,20 +92,15 @@ function gpmfol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
 end
 
 # FTP Functions
-function gpmftpopen()
-    email = "natgeo.wong%40outlook.com"
-    info(logger,"Opening FTP request to arthurhou.pps.eosdis.nasa.gov.")
-    return FTP("ftp://$(email):$(email)@arthurhou.pps.eosdis.nasa.gov")
-end
+"""
+    gpmftpcd(date,ftpID)
 
+    Moves from the home FTP directory of the Precipitation Measurement Mission
+    into the relevant GPM directory for the given date.
+"""
 function gpmftpcd(date::Date,ftp)
     info(logger,"Entering IMERG directory for $(ymd2str(date)).")
-    cd(ftp,"gpmdata/$(yr2str(date))/$(mo2str(date))/$(dy2str(date))/imerg")
-end
-
-function gpmftpclose(ftp)
-    info(logger,"Closing FTP request to arthurhou.pps.eosdis.nasa.gov.")
-    close(ftp)
+    cd(ftp,"gpmdata/$(ymd2dir(date))/imerg")
 end
 
 # GPM Processing Functions
@@ -101,7 +127,7 @@ function gpmdwn(date,sroot::AbstractString,overwrite=false)
     if !isdir(tdir) mkpath(tdir); end
 
     fH5 = gpmdt(date);
-    ftp = gpmftpopen(); gpmftpcd(date,ftp);
+    ftp = ppmftpopen(); gpmftpcd(date,ftp);
     info(logger,"Downloading GPM precipitation data for $(Date(date))")
     for ii = 1 : length(fH5)
         fH5ii = fH5[ii];
@@ -114,7 +140,7 @@ function gpmdwn(date,sroot::AbstractString,overwrite=false)
             end
         end
     end
-    gpmftpclose(ftp);
+    ppmftpclose(ftp);
 
 end
 
@@ -134,6 +160,9 @@ function gpmextract(date::Date,sroot::AbstractString,
         end
     end
 
+    info(logger,"raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)")
+    data = permutedims(data,[2,1,3]);
+
     if reg != "GLB"
         info(logger,"We do not wish to extract GPM precipitation data for the entire globe.")
         info(logger,"Finding grid-point boundaries ...")
@@ -151,7 +180,7 @@ end
 
 function gpmsave(data,rpnts,date::Date,sroot::AbstractString,reg::AbstractString="GLB")
 
-    fnc = gpmncfile(date,reg); data = permutedims(data,[2,1,3])
+    fnc = gpmncfile(date,reg);
     nlon = size(data,1); lon = convert(Array,rpnts[4]:0.1:rpnts[3]);
     nlat = size(data,2); lat = convert(Array,rpnts[2]:0.1:rpnts[1]);
     if nlon != length(lon); error(logger,"nlon is $(nlon) but lon contains $(length(lon)) elements") end

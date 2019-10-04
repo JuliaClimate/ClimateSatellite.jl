@@ -37,7 +37,7 @@ function mimicfile(date::Date,reg::AbstractString="GLB")
 end
 
 function mimicfol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
-    fol = "$(sroot)/$(reg)/$(yr2str(date))/$(mo2str(date))/"
+    fol = "$(sroot)/$(reg)/$(yrmo2dir(date))/"
     if !isdir(fol)
         notice(logger,"MIMIC data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist.");
         info(logger,"Creating data directory $(fol)."); mkpath(fol);
