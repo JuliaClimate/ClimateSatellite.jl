@@ -17,13 +17,13 @@ data from specific areas, as well as plotting of the data.
 
 # Setup Functions
 function mimicroot(root::AbstractString)
-    info(logger,"Finding root folder for MIMIC datasets.")
+    infl("Finding root folder for MIMIC datasets.")
     sroot = "$(root)/MIMIC/";
     if !isdir(sroot)
-        notice(logger,"MIMIC directory does not exist.  Creating now.");
+        infl("MIMIC directory does not exist.  Creating now.");
         mkpath(sroot);
     end
-    info(logger,"The root folder for MIMIC is in $(sroot).")
+    infl("The root folder for MIMIC is in $(sroot).")
     return sroot
 end
 
@@ -39,8 +39,8 @@ end
 function mimicfol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
     fol = "$(sroot)/$(reg)/$(yrmo2dir(date))/"
     if !isdir(fol)
-        notice(logger,"MIMIC data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist.");
-        info(logger,"Creating data directory $(fol)."); mkpath(fol);
+        infl("MIMIC data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist.");
+        infl("Creating data directory $(fol)."); mkpath(fol);
     end
     return fol
 end
@@ -48,7 +48,7 @@ end
 # MIMIC Processing Functions
 function mimicdt(date::Date)
 
-    info(logger,"Extracting year, month and day and time from $(date).")
+    infl("Extracting year, month and day and time from $(date).")
     fname = Array{String}(undef,24)
     for hr = 1 : 24
         fname[hr] = "comp$(ymd2str(date)).$(@sprintf("%02d",hr-1))0000.nc";
@@ -56,15 +56,15 @@ function mimicdt(date::Date)
 
     furl = "ftp://ftp.ssec.wisc.edu/pub/mtpw2/data/$(yrmo2str(date))/"
 
-    info(logger,"Extracted the list of MIMIC files for $(Date(date)).")
+    infl("Extracted the list of MIMIC files for $(Date(date)).")
     return fname,furl
 
 end
 
 function mimicget(url,file,sroot::AbstractString)
     try download("$(url)$(file)","$(sroot)/tmp/$(file)")
-        debug(logger,"Downloaded MIMIC tropospheric precipitable water data file $(file)")
-    catch; notice(logger,"MIMIC tropospheric precipitable water data $(file) does not exist.")
+        debl("Downloaded MIMIC tropospheric precipitable water data file $(file)")
+    catch; infl("MIMIC tropospheric precipitable water data $(file) does not exist.")
     end
 end
 
@@ -74,15 +74,15 @@ function mimicdwn(date,sroot::AbstractString,overwrite=false)
     if !isdir(tdir) mkpath(tdir); end
 
     fnc,url = mimicdt(date);
-    info(logger,"Downloading MIMIC tropospheric precipitable water data for $(Date(date))")
+    infl("Downloading MIMIC tropospheric precipitable water data for $(Date(date))")
     for ii = 1 : length(fnc)
         fncii = fnc[ii];
         if !isfile("$(sroot)/tmp/$(fncii)"); mimicget(url,fncii,sroot);
         else
             if overwrite
-                notice(logger,"MIMIC tropospheric precipitable water data file $(fncii) already exists.  Overwriting.")
+                infl("MIMIC tropospheric precipitable water data file $(fncii) already exists.  Overwriting.")
                 mimicget(url,fncii,sroot);
-            else; notice(logger,"MIMIC tropospheric precipitable water data file $(fncii) already exists.  Not overwriting.")
+            else; infl("MIMIC tropospheric precipitable water data file $(fncii) already exists.  Not overwriting.")
             end
         end
     end
@@ -95,23 +95,23 @@ function mimicextract(date::Date,sroot::AbstractString,
     data = zeros(1440,721,24) #default grid step size is 0.25x0.25 in MIMIC
     fnc,url = mimicdt(date);
 
-    info(logger,"Extracting and compiling MIMIC tropospheric precipitable water data from raw netCDF files.")
+    infl("Extracting and compiling MIMIC tropospheric precipitable water data from raw netCDF files.")
     for ii = 1 : 24
         fncii = "$(sroot)/tmp/$(fnc[ii])";
         if isfile(fncii)
               data[:,:,ii] = ncread(fncii,"tpwGrid");
-        else; notice(logger,"$(fncii) does not exists.  MIMIC tropospheric precipitable water data values set to NaN.")
+        else; infl("$(fncii) does not exists.  MIMIC tropospheric precipitable water data values set to NaN.")
               data[:,:,ii] .= NaN;
         end
     end
 
     if reg != "GLB"
-        info(logger,"We do not wish to extract MIMIC tropospheric precipitable water data for the entire globe.")
-        info(logger,"Finding grid-point boundaries ...")
+        infl("We do not wish to extract MIMIC tropospheric precipitable water data for the entire globe.")
+        infl("Finding grid-point boundaries ...")
         lon,lat = mimiclonlat();
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
-        info(logger,"Extracting MIMIC tropospheric precipitable water data for the region.")
+        infl("Extracting MIMIC tropospheric precipitable water data for the region.")
         rdata,rpnts = regionextractgrid(reg,lon,lat,data)
     else; rdata = data; lon,lat = mimiclonlat(); rpnts = [lat[end],lat[1],lon[end],lon[1]];
     end
@@ -125,32 +125,32 @@ function mimicsave(data,rpnts,date::Date,sroot::AbstractString,reg::AbstractStri
     fnc = mimicfile(date,reg);
     nlon = size(data,1); lon = convert(Array,rpnts[4]:0.25:rpnts[3]);
     nlat = size(data,2); lat = convert(Array,rpnts[2]:0.25:rpnts[1]);
-    if nlon != length(lon); error(logger,"nlon is $(nlon) but lon contains $(length(lon)) elements") end
-    if nlat != length(lat); error(logger,"nlat is $(nlat) but lat contains $(length(lat)) elements") end
+    if nlon != length(lon); errl("nlon is $(nlon) but lon contains $(length(lon)) elements") end
+    if nlat != length(lat); errl("nlat is $(nlat) but lat contains $(length(lat)) elements") end
 
     var_tpw = "tpw"; att_tpw = Dict("units" => "mm");
     var_lon = "lon"; att_lon = Dict("units" => "degree");
     var_lat = "lat"; att_lat = Dict("units" => "degree");
 
     if isfile(fnc)
-        notice(logger,"Unfinished netCDF file $(fnc) detected.  Deleting.");
+        infl("Unfinished netCDF file $(fnc) detected.  Deleting.");
         rm(fnc);
     end
 
-    info(logger,"Creating MIMIC tropospheric precipitable water netCDF file $(fnc) ...")
+    infl("Creating MIMIC tropospheric precipitable water netCDF file $(fnc) ...")
     nccreate(fnc,var_tpw,"nlon",nlon,"nlat",nlat,"t",24,atts=att_tpw,t=NC_FLOAT);
     nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
     nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
 
-    info(logger,"Saving MIMIC tropospheric water vapour data to netCDF file $(fnc) ...")
+    infl("Saving MIMIC tropospheric water vapour data to netCDF file $(fnc) ...")
     ncwrite(data,fnc,var_tpw);
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat)
 
     fol = mimicfol(date,sroot);
-    info(logger,"Moving $(fnc) to data directory $(fol)")
+    infl("Moving $(fnc) to data directory $(fol)")
 
-    if isfile("$(fol)/$(fnc)"); notice(logger,"An older version of $(fnc) exists in the $(fol) directory.  Overwriting.") end
+    if isfile("$(fol)/$(fnc)"); infl("An older version of $(fnc) exists in the $(fol) directory.  Overwriting.") end
 
     mv(fnc,"$(fol)/$(fnc)",force=true);
 
@@ -159,7 +159,7 @@ end
 function mimicrmtmp(date::Date,sroot::AbstractString)
 
     fnc,url = mimicdt(date);
-    info(logger,"Deleting raw MIMIC tropospheric water vapour files.")
+    infl("Deleting raw MIMIC tropospheric water vapour files.")
     for ii = 1 : 24
         fncii = "$(sroot)/tmp/$(fnc[ii])";
         if isfile(fncii); rm(fncii) end

@@ -3,15 +3,10 @@ module ClimateSatellite
 # Main file for the ClimateSatellite module that downloads climate-related variables from various satellite instruments
 
 ## Modules Used
-using Dates, Memento, Printf
+using Dates, Printf
 using NetCDF, HDF5, FTPClient
 using Conda, PyCall, PyPlot
 using ClimateTools
-
-## Set Logging Format!
-function __init__()
-    global logger = Memento.config!("debug")
-end
 
 ## Exporting the following functions:
 export
