@@ -11,8 +11,8 @@ functionalities include:
 function clisatroot()
 
     svrdir = "/n/kuangdss01/users/nwong";
-    dskdir = "/Volumes/CliNat-Sat")
-    docdir = "/Users/natgeo-wong/Documents/Research/"
+    dskdir = "/Volumes/CliNat-Sat";
+    docdir = "/Users/natgeo-wong/Documents/Research/";
 
     if     isdir(svrdir); return svrdir;
         infl("The path $(svrdir) exists and therefore can be used as a directory for ClimateSatellite data downloads.")
