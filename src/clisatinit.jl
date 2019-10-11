@@ -12,7 +12,7 @@ function clisatroot()
 
     svrdir = "/n/kuangdss01/users/nwong";
     dskdir = "/Volumes/CliNat-Sat";
-    docdir = "/Users/natgeo-wong/Documents/Research/";
+    docdir = "/Users/natgeo-wong/Documents/research/data";
 
     if     isdir(svrdir); return svrdir;
         @info "$(Dates.now()) - The path $(svrdir) exists and therefore can be used as a directory for ClimateSatellite data downloads."
@@ -34,7 +34,7 @@ function clisatroot(path::AbstractString)
 end
 
 # FTP Functions
-function pmmftpopen()
+function ppmftpopen()
     email = "natgeo.wong%40outlook.com"
     @info "$(Dates.now()) - Opening FTP request to arthurhou.pps.eosdis.nasa.gov."
     return FTP("ftp://$(email):$(email)@arthurhou.pps.eosdis.nasa.gov")
