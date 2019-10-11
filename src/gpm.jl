@@ -48,7 +48,7 @@ end
     given date and region variable inputs.
 """
 function gpmncfile(date::Date,reg::AbstractString)
-    return "gpm_$(reg)_prcp_$(Date(date)).nc"
+    return "gpm_$(reg)_prcp_$(ymd2str(date)).nc"
 end
 
 """
@@ -116,7 +116,7 @@ end
 
 function gpmget(ftp,file,sroot::AbstractString)
     try download(ftp,"$(file)","$(sroot)/tmp/$(file)")
-        debl("Downloaded GPM precipitation data file $(file)"
+        @debug "$(Dates.now()) - Downloaded GPM precipitation data file $(file)"
     catch; @info "$(Dates.now()) - GPM precipitation data $(file) does not exist."
     end
 end
@@ -165,30 +165,30 @@ function gpmextract(date::Date,sroot::AbstractString,
 
     if reg != "GLB"
         @info "$(Dates.now()) - We do not wish to extract GPM precipitation data for the entire globe."
-        @info "$(Dates.now()) - Finding grid-point boundaries ...")
+        @info "$(Dates.now()) - Finding grid-point boundaries ..."
         lon,lat = gpmlonlat();
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
         @info "$(Dates.now()) - Extracting GPM precipitation data for the region."
-        rdata,rpnts = regionextractgrid(reg,lon,lat,data)
-    else; rdata = data; lon,lat = gpmlonlat(); rpnts = [lat[end],lat[1],lon[end],lon[1]];
+        rdata,rgrid = regionextractgrid(reg,lon,lat,data)
+    else; rdata = data; rgrid = [gpmlonlat()];
     end
 
-    return rdata,rpnts
+    return rdata,rgrid
 
 end
 
-function gpmsave(data,rpnts,date::Date,sroot::AbstractString,reg::AbstractString="GLB")
+function gpmsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractString="GLB")
 
     fnc = gpmncfile(date,reg);
-    nlon = size(data,1); lon = convert(Array,rpnts[4]:0.1:rpnts[3]);
-    nlat = size(data,2); lat = convert(Array,rpnts[2]:0.1:rpnts[1]);
-    if nlon != length(lon); @error "$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements" end
-    if nlat != length(lat); @error "$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements" end
+    nlon = size(data,1); lon = rgrid[1];
+    nlat = size(data,2); lat = rgrid[2];
+    if nlon != length(lon); error("$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements") end
+    if nlat != length(lat); error("$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements") end
 
-    var_prcp = "prcp"; att_tpw = Dict("units" => "mm/hr");
-    var_lon  = "lon";  att_lon = Dict("units" => "degree");
-    var_lat  = "lat";  att_lat = Dict("units" => "degree");
+    var_prcp = "prcp"; att_prcp = Dict("units" => "mm/hr");
+    var_lon  = "lon";  att_lon  = Dict("units" => "degree");
+    var_lat  = "lat";  att_lat  = Dict("units" => "degree");
 
     if isfile(fnc)
         @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting."
@@ -205,7 +205,7 @@ function gpmsave(data,rpnts,date::Date,sroot::AbstractString,reg::AbstractString
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat);
 
-    fol = gpmfol(date,sroot);
+    fol = gpmfol(date,sroot,reg);
     @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
 
     if isfile("$(fol)/$(fnc)"); @info "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
@@ -226,7 +226,11 @@ function gpmrmtmp(date::Date,sroot::AbstractString)
 end
 
 # Compiled Function
-function gpmrun(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
-    gpmdwn(date,sroot); data,pnts = gpmextract(date,sroot,reg);
-    gpmsave(data,pnts,date,sroot,reg); gpmrmtmp(date,sroot);
+function gpmrun(date::Date,sroot::AbstractString,reg::AbstractArray=["GLB"])
+    sroot = gpmroot(sroot); gpmdwn(date,sroot);
+    for regii in reg
+        data,grid = gpmextract(date,sroot,regii);
+        gpmsave(data,grid,date,sroot,regii);
+    end
+    gpmrmtmp(date,sroot);
 end
