@@ -65,6 +65,7 @@ function mimicget(url,file,sroot::AbstractString)
     try download("$(url)$(file)","$(sroot)/tmp/$(file)")
         @debug "$(Dates.now()) - Downloaded MIMIC tropospheric precipitable water data file $(file)"
     catch; @info "$(Dates.now()) - MIMIC tropospheric precipitable water data $(file) does not exist."
+    end
 end
 
 function mimicdwn(date,sroot::AbstractString,overwrite=false)
@@ -111,43 +112,43 @@ function mimicextract(date::Date,sroot::AbstractString,
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
         @info "$(Dates.now()) - Extracting MIMIC tropospheric precipitable water data for the region."
-        rdata,rpnts = regionextractgrid(reg,lon,lat,data)
-    else; rdata = data; lon,lat = mimiclonlat(); rpnts = [lat[end],lat[1],lon[end],lon[1]];
+        rdata,rgrid = regionextractgrid(reg,lon,lat,data)
+    else; rdata = data; rgrid = [mimiclonlat()];
     end
 
-    return rdata,rpnts
+    return rdata,rgrid
 
 end
 
-function mimicsave(data,rpnts,date::Date,sroot::AbstractString,reg::AbstractString="GLB")
+function mimicsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractString="GLB")
 
     fnc = mimicfile(date,reg);
-    nlon = size(data,1); lon = convert(Array,rpnts[4]:0.25:rpnts[3]);
-    nlat = size(data,2); lat = convert(Array,rpnts[2]:0.25:rpnts[1]);
-    if nlon != length(lon); @error "$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements" end
-    if nlat != length(lat); @error "$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements" end
+    nlon = size(data,1); lon = rgrid[1];
+    nlat = size(data,2); lat = rgrid[2];
+    if nlon != length(lon); error("$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements") end
+    if nlat != length(lat); error("$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements") end
 
     var_tpw = "tpw"; att_tpw = Dict("units" => "mm");
     var_lon = "lon"; att_lon = Dict("units" => "degree");
     var_lat = "lat"; att_lat = Dict("units" => "degree");
 
     if isfile(fnc)
-        @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting.");
+        @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting."
         rm(fnc);
     end
 
     @info "$(Dates.now()) - Creating MIMIC tropospheric precipitable water netCDF file $(fnc) ..."
-    nccreate(fnc,var_tpw,"nlon",nlon,"nlat",nlat,"t",24,atts=att_tpw,t=NC_FLOAT);
-    nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
-    nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
+    nccreate(fnc,var_tpw,"nlon",nlon,"nlat",nlat,"t",24,atts=att_tpw);
+    nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon);
+    nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat);
 
     @info "$(Dates.now()) - Saving MIMIC tropospheric water vapour data to netCDF file $(fnc) ..."
     ncwrite(data,fnc,var_tpw);
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat)
 
-    fol = mimicfol(date,sroot);
-    @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)")
+    fol = mimicfol(date,sroot,reg);
+    @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
 
     if isfile("$(fol)/$(fnc)"); @info "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
 
@@ -167,8 +168,11 @@ function mimicrmtmp(date::Date,sroot::AbstractString)
 end
 
 # Compiled Function
-function mimicrun(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
+function mimicrun(date::Date,sroot::AbstractString,reg::AbstractArray=["GLB"])
     sroot = mimicroot(sroot); mimicdwn(date,sroot);
-    data,pnts = mimicextract(date,sroot,reg);
-    mimicsave(data,pnts,date,sroot,reg); mimicrmtmp(date,sroot);
+    for regii in reg
+        data,grid = mimicextract(date,sroot,regii);
+        mimicsave(data,grid,date,sroot,regii);
+    end
+    mimicrmtmp(date,sroot);
 end
