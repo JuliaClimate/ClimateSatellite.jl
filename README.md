@@ -10,15 +10,14 @@ satellites/missions:
 * Tropical Rainfall Measuring Mission (TRMM)
 * Morphed Integrated Microwave Imagery at CIMSS (MIMIC)-TPW2
 
-The retrieval of the following satellites/missions are forthcoming:
+The retrieval of the following satellites/missions are in development:
 * Remote Sensing Systems TM (RSS)
 * MODerate resolution Imaging Spectroradiometer (MODIS)
 
 The ClimateSatellite.jl package requires the following Julia dependencies:
-* Dates, Memento, Printf
+* Dates, Printf
 * NetCDF, HDF5, FTPClient
-* Conda, PyCall, PyPlot
-* ClimateTools
+* ClimateTools (from natgeo-wong, not from balinus)
 
 Author(s):
 * Nathanael Zhixin Wong: nathanaelwong@fas.harvard.edu
