@@ -138,9 +138,9 @@ function mimicsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractStri
     end
 
     @info "$(Dates.now()) - Creating MIMIC tropospheric precipitable water netCDF file $(fnc) ..."
-    nccreate(fnc,var_tpw,"nlon",nlon,"nlat",nlat,"t",24,atts=att_tpw);
-    nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon);
-    nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat);
+    nccreate(fnc,var_tpw,"nlon",nlon,"nlat",nlat,"t",24,atts=att_tpw,t=NC_FLOAT);
+    nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
+    nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
 
     @info "$(Dates.now()) - Saving MIMIC tropospheric water vapour data to netCDF file $(fnc) ..."
     ncwrite(data,fnc,var_tpw);
