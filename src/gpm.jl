@@ -18,13 +18,13 @@
     given input "root", which must be a string
 """
 function gpmroot(root::AbstractString)
-    infl("Making root folder for GPM datasets.")
+    @info "$(Dates.now()) - Making root folder for GPM datasets."
     sroot = "$(root)/GPM/"; mkpath(sroot)
     if !isdir(sroot)
-        infl("GPM directory does not exist.  Creating now.");
+        @info "$(Dates.now()) - GPM directory does not exist.  Creating now."
         mkpath(sroot);
     end
-    infl("The root folder for the GPM precipitation data is in $(sroot).")
+    @info "$(Dates.now()) - The root folder for the GPM precipitation data is in $(sroot)."
     return sroot
 end
 
@@ -85,8 +85,8 @@ end
 function gpmfol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
     fol = "$(sroot)/$(reg)/$(yrmo2dir(date))/"
     if !isdir(fol)
-        infl("GPM data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist.");
-        infl("Creating data directory $(fol)."); mkpath(fol);
+        @info "$(Dates.now()) - GPM data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist."
+        @info "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
     return fol
 end
@@ -99,25 +99,25 @@ end
     into the relevant GPM directory for the given date.
 """
 function gpmftpcd(date::Date,ftp)
-    infl("Entering IMERG directory for $(ymd2str(date)).")
+    @info "$(Dates.now()) - Entering IMERG directory for $(ymd2str(date))."
     cd(ftp,"gpmdata/$(ymd2dir(date))/imerg")
 end
 
 # GPM Processing Functions
 function gpmdt(date::Date)
 
-    infl("Extracting year, month and day and time from $(date).")
+    @info "$(Dates.now()) - Extracting year, month and day and time from $(date)."
     fname = gpmhdf5(date)
 
-    infl("Extracted the list of GPM files to be downloaded for $(Date(date)).")
+    @info "$(Dates.now()) - Extracted the list of GPM files to be downloaded for $(Date(date))."
     return fname
 
 end
 
 function gpmget(ftp,file,sroot::AbstractString)
     try download(ftp,"$(file)","$(sroot)/tmp/$(file)")
-        debl("Downloaded GPM precipitation data file $(file)")
-    catch; infl("GPM precipitation data $(file) does not exist.")
+        debl("Downloaded GPM precipitation data file $(file)"
+    catch; @info "$(Dates.now()) - GPM precipitation data $(file) does not exist."
     end
 end
 
@@ -128,15 +128,15 @@ function gpmdwn(date,sroot::AbstractString,overwrite=false)
 
     fH5 = gpmdt(date);
     ftp = ppmftpopen(); gpmftpcd(date,ftp);
-    infl("Downloading GPM precipitation data for $(Date(date))")
+    @info "$(Dates.now()) - Downloading GPM precipitation data for $(Date(date))"
     for ii = 1 : length(fH5)
         fH5ii = fH5[ii];
         if !isfile("$(sroot)/tmp/$(fH5ii)"); gpmget(ftp,fH5ii,sroot);
         else
             if overwrite
-                infl("GPM precipitation data file $(fH5ii) already exists.  Overwriting.")
+                @info "$(Dates.now()) - GPM precipitation data file $(fH5ii) already exists.  Overwriting."
                 mimicget(ftp,fH5ii,sroot);
-            else; infl("GPM precipitation data file $(fH5ii) already exists.  Not overwriting.")
+            else; @info "$(Dates.now()) - GPM precipitation data file $(fH5ii) already exists.  Not overwriting."
             end
         end
     end
@@ -150,26 +150,26 @@ function gpmextract(date::Date,sroot::AbstractString,
     data = zeros(1800,3600,48) #default grid step size is 0.1x0.1 in GPM
     fH5  = gpmdt(date);
 
-    infl("Extracting and compiling GPM precipitation data from HDF5 files.")
+    @info "$(Dates.now()) - Extracting and compiling GPM precipitation data from HDF5 files."
     for ii = 1 : length(fH5)
         fH5ii = "$(sroot)/tmp/$(fH5[ii])";
         if isfile(fH5ii)
               data[:,:,ii] = h5read("$(fH5ii)","/Grid/precipitationCal");
-        else; infl("$(fH5ii) does not exist.  GPM precipitation data values set to NaN.")
+        else; @info "$(Dates.now()) - $(fH5ii) does not exist.  GPM precipitation data values set to NaN."
               data[:,:,ii] .= NaN;
         end
     end
 
-    infl("raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)")
+    @info "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
     data = permutedims(data,[2,1,3]);
 
     if reg != "GLB"
-        infl("We do not wish to extract GPM precipitation data for the entire globe.")
-        infl("Finding grid-point boundaries ...")
+        @info "$(Dates.now()) - We do not wish to extract GPM precipitation data for the entire globe."
+        @info "$(Dates.now()) - Finding grid-point boundaries ...")
         lon,lat = gpmlonlat();
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
-        infl("Extracting GPM precipitation data for the region.")
+        @info "$(Dates.now()) - Extracting GPM precipitation data for the region."
         rdata,rpnts = regionextractgrid(reg,lon,lat,data)
     else; rdata = data; lon,lat = gpmlonlat(); rpnts = [lat[end],lat[1],lon[end],lon[1]];
     end
@@ -183,32 +183,32 @@ function gpmsave(data,rpnts,date::Date,sroot::AbstractString,reg::AbstractString
     fnc = gpmncfile(date,reg);
     nlon = size(data,1); lon = convert(Array,rpnts[4]:0.1:rpnts[3]);
     nlat = size(data,2); lat = convert(Array,rpnts[2]:0.1:rpnts[1]);
-    if nlon != length(lon); errl("nlon is $(nlon) but lon contains $(length(lon)) elements") end
-    if nlat != length(lat); errl("nlat is $(nlat) but lat contains $(length(lat)) elements") end
+    if nlon != length(lon); @error "$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements" end
+    if nlat != length(lat); @error "$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements" end
 
     var_prcp = "prcp"; att_tpw = Dict("units" => "mm/hr");
     var_lon  = "lon";  att_lon = Dict("units" => "degree");
     var_lat  = "lat";  att_lat = Dict("units" => "degree");
 
     if isfile(fnc)
-        infl("Unfinished netCDF file $(fnc) detected.  Deleting.");
+        @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting."
         rm(fnc);
     end
 
-    infl("Creating GPM precipitation netCDF file $(fnc) ...")
+    @info "$(Dates.now()) - Creating GPM precipitation netCDF file $(fnc) ..."
     nccreate(fnc,var_prcp,"nlon",nlon,"nlat",nlat,"t",48,atts=att_prcp,t=NC_FLOAT);
     nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
     nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
 
-    infl("Saving GPM precipitation data to netCDF file $(fnc) ...")
+    @info "$(Dates.now()) - Saving GPM precipitation data to netCDF file $(fnc) ..."
     ncwrite(data,fnc,var_prcp);
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat);
 
     fol = gpmfol(date,sroot);
-    infl("Moving $(fnc) to data directory $(fol)")
+    @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
 
-    if isfile("$(fol)/$(fnc)"); infl("An older version of $(fnc) exists in the $(fol) directory.  Overwriting.") end
+    if isfile("$(fol)/$(fnc)"); @info "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
 
     mv(fnc,"$(fol)/$(fnc)",force=true);
 
@@ -217,7 +217,7 @@ end
 function gpmrmtmp(date::Date,sroot::AbstractString)
 
     fH5 = gpmdt(date);
-    infl("Deleting raw GPM precipitation data files.")
+    @info "$(Dates.now()) - Deleting raw GPM precipitation data files."
     for ii = 1 : length(fH5)
         fH5ii = "$(sroot)/tmp/$(fH5[ii])";
         if isfile(fH5ii); rm(fH5ii) end

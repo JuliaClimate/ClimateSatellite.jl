@@ -18,13 +18,13 @@
     given input "root", which must be a string
 """
 function trmmroot(root::AbstractString)
-    infl("Making root folder for TRMM datasets.")
+    @info "$(Dates.now()) - Making root folder for TRMM datasets."
     sroot = "$(root)/TRMM/"; mkpath(sroot)
     if !isdir(sroot)
-        infl("TRMM directory does not exist.  Creating now.");
+        @info "$(Dates.now()) - TRMM directory does not exist.  Creating now."
         mkpath(sroot);
     end
-    infl("The root folder for the TRMM precipitation data is in $(sroot).")
+    @info "$(Dates.now()) - The root folder for the TRMM precipitation data is in $(sroot)."
     return sroot
 end
 
@@ -83,8 +83,8 @@ end
 function trmmfol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
     fol = "$(sroot)/$(reg)/$(yrmo2dir(date))/"
     if !isdir(fol)
-        infl("TRMM data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist.");
-        infl("Creating data directory $(fol)."); mkpath(fol);
+        @info "$(Dates.now()) - TRMM data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist."
+        @info "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
     return fol
 end
@@ -97,27 +97,27 @@ end
     into the relevant TRMM directory for the given date.
 """
 function trmmftpcd(date::Date,ftp)
-    infl("Entering TRMM directory for $(ymd2str(date)).")
+    @info "$(Dates.now()) - Entering TRMM directory for $(ymd2str(date))."
     cd(ftp,"trmmdata/ByDate/V07/$(ymd2dir(date))/")
 end
 
 # TRMM Processing Functions
 function trmmdt(date::Date)
 
-    infl("Extracting year, month and day and time from $(date).")
+    @info "$(Dates.now()) - Extracting year, month and day and time from $(date)."
     fname = trmmhdf(date)
 
-    infl("Extracted the list of TRMM files to be downloaded for $(Date(date)).")
+    @info "$(Dates.now()) - Extracted the list of TRMM files to be downloaded for $(Date(date))."
     return fname
 
 end
 
 function trmmget(ftp,file,sroot::AbstractString)
     try download(ftp,"$(file)","$(sroot)/tmp/$(file).gz")
-        debl("Downloaded TRMM precipitation data file $(file).gz")
+        @debug "$(Dates.now()) - Downloaded TRMM precipitation data file $(file).gz"
         run(pipeline(`gunzip $(sroot)/tmp/$(file).gz`,"$(sroot)/tmp/$(file)"));
-        debl("Unzipped tar.gz file $(file).gz into $(file)")
-    catch; infl("TRMM precipitation data $(file) does not exist.")
+        @debug "$(Dates.now()) - Unzipped tar.gz file $(file).gz into $(file)"
+    catch; @info "$(Dates.now()) - TRMM precipitation data $(file) does not exist."
     end
 end
 
@@ -137,15 +137,15 @@ function trmmdwn(date,sroot::AbstractString,overwrite=false)
 
     fHDF = trmmdt(date);
     ftp  = ppmftpopen(); trmmftpcd(date,ftp);
-    infl("Downloading TRMM precipitation data for $(Date(date))")
+    @info "$(Dates.now()) - Downloading TRMM precipitation data for $(Date(date))"
     for ii = 1 : length(fH5)
         fHii = fHDF[ii];
         if !isfile("$(sroot)/tmp/$(fH5ii)"); trmmget(ftp,fHii,sroot);
         else
             if overwrite
-                infl("TRMM precipitation data file $(fHii) already exists.  Overwriting.")
+                @info "$(Dates.now()) - TRMM precipitation data file $(fHii) already exists.  Overwriting."
                 mimicget(ftp,fH5ii,sroot);
-            else; infl("TRMM precipitation data file $(fHii) already exists.  Not overwriting.")
+            else; @info "$(Dates.now()) - TRMM precipitation data file $(fHii) already exists.  Not overwriting."
             end
         end
     end
@@ -159,23 +159,23 @@ function trmmextract(date::Date,sroot::AbstractString,
     data = zeros(1440,400,8) #default grid step size is 0.1x0.1 in TRMM
     fHDF = trmmdt(date);
 
-    infl("Extracting and compiling TRMM precipitation data from HDF5 files.")
+    @info "$(Dates.now()) - Extracting and compiling TRMM precipitation data from HDF5 files."
     for ii = 1 : length(fHDF)
         fHii = "$(sroot)/tmp/$(fHDF[ii])";
         if isfile(fH5ii)
-              data[:,:,ii] = trmmh4read(fHii,"precipitation");
-        else; infl("$(fHii) does not exist.  TRMM precipitation data values set to NaN.")
+              data[:,:,ii] = trmmh4read(fHii,"precipitation"
+        else; @info "$(Dates.now()) - $(fHii) does not exist.  TRMM precipitation data values set to NaN."
               data[:,:,ii] .= NaN;
         end
     end
 
     if reg != "GLB"
-        infl("We do not wish to extract TRMM precipitation data for the entire globe.")
-        infl("Finding grid-point boundaries ...")
+        @info "$(Dates.now()) - We do not wish to extract TRMM precipitation data for the entire globe."
+        @info "$(Dates.now()) - Finding grid-point boundaries ...")
         lon,lat = trmmlonlat();
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
-        infl("Extracting TRMM precipitation data for the region.")
+        @info "$(Dates.now()) - Extracting TRMM precipitation data for the region."
         rdata,rpnts = regionextractgrid(reg,lon,lat,data)
     else; rdata = data; lon,lat = trmmlonlat(); rpnts = [lat[end],lat[1],lon[end],lon[1]];
     end
@@ -189,32 +189,32 @@ function trmmsave(data,rpnts,date::Date,sroot::AbstractString,reg::AbstractStrin
     fnc = trmmncfile(date,reg);
     nlon = size(data,1); lon = convert(Array,rpnts[4]:0.1:rpnts[3]);
     nlat = size(data,2); lat = convert(Array,rpnts[2]:0.1:rpnts[1]);
-    if nlon != length(lon); errl("nlon is $(nlon) but lon contains $(length(lon)) elements") end
-    if nlat != length(lat); errl("nlat is $(nlat) but lat contains $(length(lat)) elements") end
+    if nlon != length(lon); @error "$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements" end
+    if nlat != length(lat); @error "$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements" end
 
     var_prcp = "prcp"; att_tpw = Dict("units" => "mm/hr");
     var_lon  = "lon";  att_lon = Dict("units" => "degree");
     var_lat  = "lat";  att_lat = Dict("units" => "degree");
 
     if isfile(fnc)
-        infl("Unfinished netCDF file $(fnc) detected.  Deleting.");
+        @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting.";
         rm(fnc);
     end
 
-    infl("Creating TRMM precipitation netCDF file $(fnc) ...")
+    @info "$(Dates.now()) - Creating TRMM precipitation netCDF file $(fnc) ..."
     nccreate(fnc,var_prcp,"nlon",nlon,"nlat",nlat,"t",8,atts=att_prcp,t=NC_FLOAT);
     nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
     nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
 
-    infl("Saving TRMM precipitation data to netCDF file $(fnc) ...")
+    @info "$(Dates.now()) - Saving TRMM precipitation data to netCDF file $(fnc) ..."
     ncwrite(data,fnc,var_prcp);
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat);
 
     fol = trmmfol(date,sroot);
-    infl("Moving $(fnc) to data directory $(fol)")
+    @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
 
-    if isfile("$(fol)/$(fnc)"); infl("An older version of $(fnc) exists in the $(fol) directory.  Overwriting.") end
+    if isfile("$(fol)/$(fnc)"); @info "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
 
     mv(fnc,"$(fol)/$(fnc)",force=true);
 
@@ -223,7 +223,7 @@ end
 function trmmrmtmp(date::Date,sroot::AbstractString)
 
     fHDF = trmmdt(date);
-    infl("Deleting raw TRMM precipitation data files.")
+    @info "$(Dates.now()) - Deleting raw TRMM precipitation data files."
     for ii = 1 : length(fHDF)
         fHii = "$(sroot)/tmp/$(fHDF[ii])";
         if isfile(fHii); rm(fHii) end
