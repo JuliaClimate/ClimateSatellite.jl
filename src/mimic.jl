@@ -62,7 +62,7 @@ function mimicdt(date::Date)
 end
 
 function mimicget(url,file,sroot::AbstractString)
-    try download("$(url)$(file)","$(sroot)/tmp/$(file)")
+    try download("$(url)$(file)","$(sroot)/tmp/$(file)");
         @debug "$(Dates.now()) - Downloaded MIMIC tropospheric precipitable water data file $(file)"
     catch; @info "$(Dates.now()) - MIMIC tropospheric precipitable water data $(file) does not exist."
     end
