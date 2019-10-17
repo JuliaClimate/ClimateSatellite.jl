@@ -227,7 +227,7 @@ end
 
 # Compiled Function
 function gpmfrun(date::Date,sroot::AbstractString,reg::AbstractArray=["GLB"])
-    sroot = gpmfroot(sroot); gpmfdwn(date,sroot);
+    sroot = gpmfroot(sroot); cd(sroot); gpmfdwn(date,sroot);
     for regii in reg
         data,grid = gpmfextract(date,sroot,regii);
         gpmfsave(data,grid,date,sroot,regii);

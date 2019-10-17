@@ -227,7 +227,7 @@ end
 
 # Compiled Function
 function gpmlrun(date::Date,sroot::AbstractString,reg::AbstractArray=["GLB"])
-    sroot = gpmlroot(sroot); gpmldwn(date,sroot);
+    sroot = gpmlroot(sroot); cd(sroot); gpmldwn(date,sroot);
     for regii in reg
         data,grid = gpmlextract(date,sroot,regii);
         gpmlsave(data,grid,date,sroot,regii);

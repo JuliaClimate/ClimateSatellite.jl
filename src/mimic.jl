@@ -169,7 +169,7 @@ end
 
 # Compiled Function
 function mimicrun(date::Date,sroot::AbstractString,reg::AbstractArray=["GLB"])
-    sroot = mimicroot(sroot); mimicdwn(date,sroot);
+    sroot = mimicroot(sroot); cd(sroot); mimicdwn(date,sroot);
     for regii in reg
         data,grid = mimicextract(date,sroot,regii);
         mimicsave(data,grid,date,sroot,regii);

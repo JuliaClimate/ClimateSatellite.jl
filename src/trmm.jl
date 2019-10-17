@@ -250,7 +250,7 @@ end
 
 # Compiled Function
 function trmmrun(date::Date,sroot::AbstractString,reg::AbstractArray=["GLB"])
-    sroot = trmmroot(sroot); trmmdwn(date,sroot);
+    sroot = trmmroot(sroot); cd(sroot); trmmdwn(date,sroot);
     for regii in reg
         data,grid = trmmextract(date,sroot,regii);
         trmmsave(data,grid,date,sroot,regii);

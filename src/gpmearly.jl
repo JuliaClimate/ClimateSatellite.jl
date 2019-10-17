@@ -227,7 +227,7 @@ end
 
 # Compiled Function
 function gpmerun(date::Date,sroot::AbstractString,reg::AbstractArray=["GLB"])
-    sroot = gpmeroot(sroot); gpmedwn(date,sroot);
+    sroot = gpmeroot(sroot); cd(sroot); gpmedwn(date,sroot);
     for regii in reg
         data,grid = gpmeextract(date,sroot,regii);
         gpmesave(data,grid,date,sroot,regii);
