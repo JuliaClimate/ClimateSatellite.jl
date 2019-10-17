@@ -62,9 +62,16 @@ end
 function trmmhdf(date)
 
     fname = Array{String}(undef,8)
-    for ii = 1 : 8
-        hr = (ii-1)*3; hr = @sprintf("%02d",hr);
-        fname[ii] = "3B42.$(ymd2str(date)).$(hr).7.HDF"
+    if date > Date(2010,9,30)
+        for ii = 1 : 8
+            hr = (ii-1)*3; hr = @sprintf("%02d",hr);
+            fname[ii] = "3B42.$(ymd2str(date)).$(hr).7A.HDF"
+        end
+    else
+        for ii = 1 : 8
+            hr = (ii-1)*3; hr = @sprintf("%02d",hr);
+            fname[ii] = "3B42.$(ymd2str(date)).$(hr).7.HDF"
+        end
     end
     return fname
 
