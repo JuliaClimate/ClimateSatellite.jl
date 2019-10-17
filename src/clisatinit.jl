@@ -10,9 +10,9 @@ functionalities include:
 # Root Functions
 function clisatroot()
 
-    svrdir = "/n/kuangdss01/users/nwong";
+    svrdir = "/n/kuangdss01/users/nwong/data/";
     dskdir = "/Volumes/CliNat-Sat";
-    docdir = "/Users/natgeo-wong/Documents/research/data";
+    docdir = "/Users/natgeo-wong/Documents/research/data/";
 
     if     isdir(svrdir); return svrdir;
         @info "$(Dates.now()) - The path $(svrdir) exists and therefore can be used as a directory for ClimateSatellite data downloads."
