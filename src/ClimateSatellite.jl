@@ -9,7 +9,8 @@ using ClimateTools
 
 ## Exporting the following functions:
 export
-        clisatroot, ppmftpopen, ppmftpclose,
+        clisatroot, pmmfinftpopen, pmmnrtftpopen, pmmftpclose,
+        gpmfroot, gpmlroot, gpmeroot, trmmroot, mimicroot,
         gpmfrun, gpmlrun, gpmerun, trmmrun, mimicrun
 
 ## Including other files in the module
