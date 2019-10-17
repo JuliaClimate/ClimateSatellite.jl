@@ -10,16 +10,22 @@ functionalities include:
 # Root Functions
 function clisatroot()
 
-    svrdir = "/n/kuangdss01/users/nwong/data/";
+    svrstr = "/n/kuangdss01/users/nwong/data/";
+    svrrun = "/n/kuangdss01/users/nwong/data/";
     dskdir = "/Volumes/CliNat-Sat";
     docdir = "/Users/natgeo-wong/Documents/research/data/";
 
-    if     isdir(svrdir); return svrdir;
+    if     isdir(svrstr); return svrstr;
         @info "$(Dates.now()) - The path $(svrdir) exists and therefore can be used as a directory for ClimateSatellite data downloads."
-    elseif isdir(dskdir); return dskdir
-        @info "$(Dates.now()) - The path $(dskdir) exists and therefore can be used as a directory for ClimateSatellite data downloads."
-    elseif isdir(docdir); return docdir
-        @info "$(Dates.now()) - The path $(docdir) exists and therefore can be used as a directory for ClimateSatellite data downloads."
+    elseif isdir(svrrun); return svrrun;
+        @warn "$(Dates.now()) - The path $(svrdir) is not readable."
+        @info "$(Dates.now()) - The path $(svrrun) exists and therefore can be used as a directory for ClimateSatellite data downloads."
+    elseif isdir(dskdir); return dskdir;
+        @info "$(Dates.now()) - Not running on remote server.  Checking for external disks."
+        @info "$(Dates.now()) - External disk $(dskdir) exists and therefore can be used as a directory for ClimateSatellite data downloads."
+    elseif isdir(docdir); return docdir;
+        @info "$(Dates.now()) - Not running on remote server.  Checking for external disks."
+        @info "$(Dates.now()) - External disks not found.  Using local research data directory $(docdir) for ClimateSatellite data downloads."
     else
         @error "$(Dates.now()) - The predefined directories in clisatroot.jl do not exist.  They are user-dependent, so please modify/customize accordingly."
     end
