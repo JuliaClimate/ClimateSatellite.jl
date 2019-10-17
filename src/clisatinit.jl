@@ -11,7 +11,7 @@ functionalities include:
 function clisatroot()
 
     svrstr = "/n/kuangdss01/users/nwong/data/";
-    svrrun = "/n/kuangdss01/users/nwong/data/";
+    svrrun = "/n/holylfs/LABS/kuang_lab/nwong/data/";
     dskdir = "/Volumes/CliNat-Sat";
     docdir = "/Users/natgeo-wong/Documents/research/data/";
 
