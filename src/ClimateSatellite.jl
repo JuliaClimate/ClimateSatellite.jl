@@ -10,12 +10,14 @@ using ClimateTools
 ## Exporting the following functions:
 export
         clisatroot, ppmftpopen, ppmftpclose,
-        gpmrun, trmmrun, mimicrun
+        gpmfrun, gpmlrun, gpmerun, trmmrun, mimicrun
 
 ## Including other files in the module
 include("clisatinit.jl")
 
-include("gpm.jl")
+include("gpmfinal.jl")
+include("gpmlate.jl")
+include("gpmearly.jl")
 include("trmm.jl")
 
 include("mimic.jl")
