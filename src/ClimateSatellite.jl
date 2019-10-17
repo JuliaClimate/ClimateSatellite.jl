@@ -1,6 +1,7 @@
 module ClimateSatellite
 
-# Main file for the ClimateSatellite module that downloads climate-related variables from various satellite instruments
+# Main file for the ClimateSatellite module that downloads climate-related
+# variables from various satellite instruments
 
 ## Modules Used
 using Dates, Printf
