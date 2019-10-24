@@ -99,9 +99,16 @@ function mimicextract(date::Date,sroot::AbstractString,
     for ii = 1 : 24
         fncii = "$(sroot)/tmp/$(fnc[ii])";
         if isfile(fncii)
-              data[:,:,ii] = ncread(fncii,"tpwGrid");
-        else; @info "$(Dates.now()) - $(fncii) does not exists.  MIMIC tropospheric precipitable water data values set to NaN."
-              data[:,:,ii] .= NaN;
+            try
+                @info "$(Dates.now()) - Extracting MIMIC tropospheric precipitable water data from $(fncii) ..."
+                data[:,:,ii] = ncread(fncii,"tpwGrid");
+            catch
+                @warn "$(Dates.now()) - Unable to extract/open $(fncii).  Setting MIMIC tropospheric precipitable water data values set to NaN."
+                data[:,:,ii] .= NaN;
+            end
+        else
+            @info "$(Dates.now()) - $(fncii) does not exists.  MIMIC tropospheric precipitable water data values set to NaN."
+            data[:,:,ii] .= NaN;
         end
     end
 
