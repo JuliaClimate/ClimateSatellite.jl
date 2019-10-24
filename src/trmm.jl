@@ -152,7 +152,7 @@ function trmmdwn(date,sroot::AbstractString,overwrite=false)
     if !isdir(tdir) mkpath(tdir); end
 
     fHDF = trmmdt(date);
-    ftp  = ppmftpopen(); trmmftpcd(date,ftp);
+    ftp  = pmmfinftpopen(); trmmftpcd(date,ftp);
     @info "$(Dates.now()) - Downloading TRMM precipitation data for $(Date(date))"
     for ii = 1 : length(fHDF)
         fHii = fHDF[ii];
@@ -166,7 +166,7 @@ function trmmdwn(date,sroot::AbstractString,overwrite=false)
             end
         end
     end
-    ppmftpclose(ftp);
+    pmmftpclose(ftp);
 
 end
 
@@ -185,7 +185,7 @@ function trmmextract(date::Date,sroot::AbstractString,
               data[:,:,ii] .= NaN;
         end
     end
-    
+
     @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
     ncclose()
 
