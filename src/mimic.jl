@@ -92,16 +92,16 @@ end
 function mimicextract(date::Date,sroot::AbstractString,
     reg::AbstractString="GLB")
 
-    data = zeros(1440,721,24) #default grid step size is 0.25x0.25 in MIMIC
+    @time data = zeros(1440,721,24) #default grid step size is 0.25x0.25 in MIMIC
     fnc,url = mimicdt(date);
 
     @info "$(Dates.now()) - Extracting and compiling MIMIC tropospheric precipitable water data from raw netCDF files."
     for ii = 1 : 24
         fncii = "$(sroot)/tmp/$(fnc[ii])";
         if isfile(fncii)
-              data[:,:,ii] = ncread(fncii,"tpwGrid");
+              @time data[:,:,ii] = ncread(fncii,"tpwGrid");
         else; @info "$(Dates.now()) - $(fncii) does not exists.  MIMIC tropospheric precipitable water data values set to NaN."
-              data[:,:,ii] .= NaN;
+              @time data[:,:,ii] .= NaN;
         end
     end
 
@@ -115,7 +115,7 @@ function mimicextract(date::Date,sroot::AbstractString,
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
         @info "$(Dates.now()) - Extracting MIMIC tropospheric precipitable water data for the region."
-        rdata,rgrid = regionextractgrid(reg,lon,lat,data)
+        @time rdata,rgrid = regionextractgrid(reg,lon,lat,data)
     else; rdata = data; rgrid = [mimiclonlat()];
     end
 
@@ -141,14 +141,14 @@ function mimicsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractStri
     end
 
     @info "$(Dates.now()) - Creating MIMIC tropospheric precipitable water netCDF file $(fnc) ..."
-    nccreate(fnc,var_tpw,"nlon",nlon,"nlat",nlat,"t",24,atts=att_tpw,t=NC_FLOAT);
-    nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
-    nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
+    @time nccreate(fnc,var_tpw,"nlon",nlon,"nlat",nlat,"t",24,atts=att_tpw,t=NC_FLOAT);
+    @time nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
+    @time nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
 
     @info "$(Dates.now()) - Saving MIMIC tropospheric water vapour data to netCDF file $(fnc) ..."
-    ncwrite(data,fnc,var_tpw);
-    ncwrite(lon,fnc,var_lon);
-    ncwrite(lat,fnc,var_lat)
+    @time ncwrite(data,fnc,var_tpw);
+    @time ncwrite(lon,fnc,var_lon);
+    @time ncwrite(lat,fnc,var_lat)
 
     @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
     ncclose()
