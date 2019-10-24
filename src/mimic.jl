@@ -115,7 +115,7 @@ function mimicextract(date::Date,sroot::AbstractString,
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
         @info "$(Dates.now()) - Extracting MIMIC tropospheric precipitable water data for the region."
-        rdata,rgrid = regionextractgrid(reg,lon,lat,data)
+        rdata,rgrid = regionextractgrid(data,reg,lon,lat)
     else; rdata = data; rgrid = [mimiclonlat()];
     end
 

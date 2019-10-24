@@ -196,7 +196,7 @@ function trmmextract(date::Date,sroot::AbstractString,
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
         @info "$(Dates.now()) - Extracting TRMM precipitation data for the region."
-        rdata,rgrid = regionextractgrid(reg,lon,lat,data)
+        rdata,rgrid = regionextractgrid(data,reg,lon,lat)
     else; rdata = data; rgrid = [trmmlonlat()];
     end
 

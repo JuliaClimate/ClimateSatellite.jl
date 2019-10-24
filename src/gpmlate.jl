@@ -173,7 +173,7 @@ function gpmlextract(date::Date,sroot::AbstractString,
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
         @info "$(Dates.now()) - Extracting GPM Near-RealTime (Late) precipitation data for the region."
-        rdata,rgrid = regionextractgrid(reg,lon,lat,data)
+        rdata,rgrid = regionextractgrid(data,reg,lon,lat)
     else; rdata = data; rgrid = [gpmllonlat()];
     end
 
