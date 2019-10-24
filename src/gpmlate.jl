@@ -160,6 +160,9 @@ function gpmlextract(date::Date,sroot::AbstractString,
         end
     end
 
+    @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
+    ncclose()
+
     @info "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
     data = permutedims(data,[2,1,3]);
 
@@ -204,6 +207,9 @@ function gpmlsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractStrin
     ncwrite(data,fnc,var_prcp);
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat);
+
+    @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
+    ncclose()
 
     fol = gpmlfol(date,sroot,reg);
     @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"

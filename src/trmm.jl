@@ -185,6 +185,9 @@ function trmmextract(date::Date,sroot::AbstractString,
               data[:,:,ii] .= NaN;
         end
     end
+    
+    @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
+    ncclose()
 
     if reg != "GLB"
         @info "$(Dates.now()) - We do not wish to extract TRMM precipitation data for the entire globe."
@@ -227,6 +230,9 @@ function trmmsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractStrin
     ncwrite(data,fnc,var_prcp);
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat);
+
+    @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
+    ncclose()
 
     fol = trmmfol(date,sroot,reg);
     @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
