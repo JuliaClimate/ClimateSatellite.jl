@@ -105,6 +105,9 @@ function mimicextract(date::Date,sroot::AbstractString,
         end
     end
 
+    @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
+    ncclose()
+
     if reg != "GLB"
         @info "$(Dates.now()) - We do not wish to extract MIMIC tropospheric precipitable water data for the entire globe."
         @info "$(Dates.now()) - Finding grid-point boundaries ..."
@@ -146,6 +149,9 @@ function mimicsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractStri
     ncwrite(data,fnc,var_tpw);
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat)
+
+    @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
+    ncclose()
 
     fol = mimicfol(date,sroot,reg);
     @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
