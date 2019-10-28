@@ -1,29 +1,17 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
-
-jobs:
-  include:
-    - os: osx
-      julia: 1.0
-    - os: linux
-      julia: 1.0
-      env: PYTHON=python
-    - os: linux
-      julia: 1.0
-      env: PYTHON=python3
-    - os: osx
-      julia: nightly
-    - os: linux
-      julia: nightly
-      env: PYTHON=python
-    - os: linux
-      julia: nightly
-      env: PYTHON=python3
-
+os:
+  - linux
+  - osx
+julia:
+  - 1.0
+  - nightly
 matrix:
   allow_failures:
     - julia: nightly
   fast_finish: true
-
 notifications:
   email: false
+env:
+  global:
+    - PYTHON=Conda
