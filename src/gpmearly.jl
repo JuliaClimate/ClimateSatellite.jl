@@ -85,7 +85,7 @@ end
 function gpmefol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
     fol = "$(sroot)/$(reg)/$(yrmo2dir(date))/"
     if !isdir(fol)
-        @info "$(Dates.now()) - GPM Near-RealTime (Early) data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist."
+        @info "$(Dates.now()) - GPM Near-RealTime (Early) data directory for the $(regionfullname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist."
         @info "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
     return fol

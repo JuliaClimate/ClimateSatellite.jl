@@ -3,16 +3,6 @@ This file contains all the functions that are used in the retrieval of MIMIC
 precipitable water datasets.  This includes the downloading and and retrieval
 data from specific areas, as well as plotting of the data.
 
-
-
--- mimicdwn(date,region="GLB",root)
-    downloads hour gridded precipitable water for a given date (and if
-    specified, region)
--- mimicdt(date)
-    extracts the year, month and day and generates:
-    -- a list of files to download
-    -- the url where the files are to be downloaded from
-
 """
 
 # Setup Functions
@@ -39,7 +29,7 @@ end
 function mimicfol(date::Date,sroot::AbstractString,reg::AbstractString="GLB")
     fol = "$(sroot)/$(reg)/$(yrmo2dir(date))/"
     if !isdir(fol)
-        @info "$(Dates.now()) - MIMIC data directory for the $(regionname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist."
+        @info "$(Dates.now()) - MIMIC data directory for the $(regionfullname(reg)) region, year $(yr2str(date)) and month $(mo2str(date)) does not exist."
         @info "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
     return fol
