@@ -174,7 +174,7 @@ function gpmeextract(date::Date,sroot::AbstractString,
 
         @info "$(Dates.now()) - Extracting GPM Near-RealTime (Early) precipitation data for the region."
         rdata,rgrid = regionextractgrid(data,reg,lon,lat)
-    else; rdata = data; rgrid = [gpmelonlat()];
+    else; rdata = data; rgrid = gpmelonlat();
     end
 
     return rdata,rgrid

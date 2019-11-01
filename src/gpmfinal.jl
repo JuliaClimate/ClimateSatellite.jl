@@ -174,7 +174,7 @@ function gpmfextract(date::Date,sroot::AbstractString,
 
         @info "$(Dates.now()) - Extracting GPM Research (Final) precipitation data for the region."
         rdata,rgrid = regionextractgrid(data,reg,lon,lat)
-    else; rdata = data; rgrid = [gpmflonlat()];
+    else; rdata = data; rgrid = gpmflonlat();
     end
 
     return rdata,rgrid
