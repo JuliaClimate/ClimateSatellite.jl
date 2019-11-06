@@ -15,7 +15,7 @@ export
         gpmfrun, gpmlrun, gpmerun, trmmrun, mimicrun
 
 ## Including other files in the module
-include("initialize.jl")
+include("startup.jl")
 
 include("gpmfinal.jl")
 include("gpmlate.jl")
