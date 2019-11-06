@@ -28,7 +28,7 @@ function clisatroot(path::AbstractString)
     if isdir(path)
         @info "$(Dates.now()) - The path $(path) exists and therefore can be used as a directory for ClimateSatellite data downloads."
     else
-        @warn "$(Dates.now()) - he path $(path) does not exist.  A new directory will be created here.  Therefore if you already have an existing repository for ClimateSatellite data, make sure that $(path) is the correct location."
+        @warn "$(Dates.now()) - The path $(path) does not exist.  A new directory will be created here.  Therefore if you already have an existing repository for ClimateSatellite data, make sure that $(path) is the correct location."
         @info "$(Dates.now()) - Creating path $(path) ..."
         mkpath(path);
     end
