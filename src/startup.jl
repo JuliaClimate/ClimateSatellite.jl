@@ -10,13 +10,13 @@ functionalities include:
 # Root Functions
 function clisatroot()
 
-    path = joinpath("$(homedir)","research","data";
+    path = joinpath("$(homedir)","research","data");
     @info "$(Dates.now()) - No directory path was given.  Setting to default path: $(path) for ClimateSatellite data downloads."
 
     if isdir(path)
         @info "$(Dates.now()) - The default path $(path) exists and therefore can be used as a directory for ClimateSatellite data downloads."
     else
-        @warn "$(Dates.now()) - The path $(path) does not exist.  Creating now ..."
+        @info "$(Dates.now()) - The path $(path) does not exist.  Creating now ..."
         mkpath(path);
     end
 
@@ -27,6 +27,10 @@ end
 function clisatroot(path::AbstractString)
     if isdir(path)
         @info "$(Dates.now()) - The path $(path) exists and therefore can be used as a directory for ClimateSatellite data downloads."
+    else
+        @warn "$(Dates.now()) - he path $(path) does not exist.  A new directory will be created here.  Therefore if you already have an existing repository for ClimateSatellite data, make sure that $(path) is the correct location."
+        @info "$(Dates.now()) - Creating path $(path) ..."
+        mkpath(path);
     end
     return path
 end
