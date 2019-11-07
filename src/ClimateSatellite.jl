@@ -12,6 +12,8 @@ using ClimateEasy
 export
         clisatroot, pmmfinftpopen, pmmnrtftpopen, pmmftpclose,
         gpmfroot, gpmlroot, gpmeroot, trmmroot, mimicroot,
+        gpmffol, gpmlfol, gpmefol, trmmfol, mimicfol,
+        gpmfncfile, gpmlncfile, gpmencfile, trmmncfile, mimicfile,
         gpmfrun, gpmlrun, gpmerun, trmmrun, mimicrun
 
 ## Including other files in the module
