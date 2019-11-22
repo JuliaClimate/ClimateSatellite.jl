@@ -10,7 +10,7 @@ functionalities include:
 # Root Functions
 function clisatroot()
 
-    path = joinpath("$(homedir)","research","data");
+    path = joinpath("$(homedir())","research","data");
     @info "$(Dates.now()) - No directory path was given.  Setting to default path: $(path) for ClimateSatellite data downloads."
 
     if isdir(path)
