@@ -18,13 +18,13 @@
     given input "root", which must be a string
 """
 function gpmlroot(root::AbstractString)
-    @info "$(Dates.now()) - Making root folder for GPM Near-RealTime (Late) datasets."
+    @debug "$(Dates.now()) - Making root folder for GPM Near-RealTime (Late) datasets."
     sroot = "$(root)/GPM-LATE/"; mkpath(sroot)
     if !isdir(sroot)
         @info "$(Dates.now()) - GPM Near-RealTime (Late) directory does not exist.  Creating now."
         mkpath(sroot);
     end
-    @info "$(Dates.now()) - The root folder for the GPM Near-RealTime (Late) precipitation data is in $(sroot)."
+    @debug "$(Dates.now()) - The root folder for the GPM Near-RealTime (Late) precipitation data is in $(sroot)."
     return sroot
 end
 
@@ -106,10 +106,10 @@ end
 # GPM Processing Functions
 function gpmldt(date::Date)
 
-    @info "$(Dates.now()) - Extracting year, month and day and time from $(date)."
+    @debug "$(Dates.now()) - Extracting year, month and day and time from $(date)."
     fname = gpmlhdf5(date)
 
-    @info "$(Dates.now()) - Extracted the list of GPM files to be downloaded for $(Date(date))."
+    @debug "$(Dates.now()) - Extracted the list of GPM files to be downloaded for $(Date(date))."
     return fname
 
 end
@@ -160,15 +160,12 @@ function gpmlextract(date::Date,sroot::AbstractString,
         end
     end
 
-    @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
-    ncclose()
-
-    @info "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
+    @debug "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
     data = permutedims(data,[2,1,3]);
 
     if reg != "GLB"
-        @info "$(Dates.now()) - We do not wish to extract GPM Near-RealTime (Late) precipitation data for the entire globe."
-        @info "$(Dates.now()) - Finding grid-point boundaries ..."
+        @debug "$(Dates.now()) - We do not wish to extract GPM Near-RealTime (Late) precipitation data for the entire globe."
+        @debug "$(Dates.now()) - Finding grid-point boundaries ..."
         lon,lat = gpmllonlat();
         bounds = regionbounds(reg); igrid = regiongrid(bounds,lon,lat);
 
@@ -198,7 +195,7 @@ function gpmlsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractStrin
         rm(fnc);
     end
 
-    @info "$(Dates.now()) - Creating GPM Near-RealTime (Late) precipitation netCDF file $(fnc) ..."
+    @debug "$(Dates.now()) - Creating GPM Near-RealTime (Late) precipitation netCDF file $(fnc) ..."
     nccreate(fnc,var_prcp,"nlon",nlon,"nlat",nlat,"t",48,atts=att_prcp,t=NC_FLOAT);
     nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
     nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
@@ -208,11 +205,8 @@ function gpmlsave(data,rgrid,date::Date,sroot::AbstractString,reg::AbstractStrin
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat);
 
-    @debug "$(Dates.now()) - NetCDF.jl's ncread causes memory leakage.  Using ncclose() as a workaround."
-    ncclose()
-
     fol = gpmlfol(date,sroot,reg);
-    @info "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
+    @debug "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
 
     if isfile("$(fol)/$(fnc)"); @info "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
 
@@ -223,7 +217,7 @@ end
 function gpmlrmtmp(date::Date,sroot::AbstractString)
 
     fH5 = gpmldt(date);
-    @info "$(Dates.now()) - Deleting raw GPM Near-RealTime (Late) precipitation data files."
+    @debug "$(Dates.now()) - Deleting raw GPM Near-RealTime (Late) precipitation data files."
     for ii = 1 : length(fH5)
         fH5ii = "$(sroot)/tmp/$(fH5[ii])";
         if isfile(fH5ii); rm(fH5ii) end
