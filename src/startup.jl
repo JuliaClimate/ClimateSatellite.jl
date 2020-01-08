@@ -36,16 +36,10 @@ function clisatroot(path::AbstractString)
 end
 
 # FTP Functions
-function pmmfinftpopen()
+function pmmftpopen(server::AbstractString)
     email = "natgeo.wong%40outlook.com"
-    @info "$(Dates.now()) - Opening FTP request to arthurhou.pps.eosdis.nasa.gov."
-    return FTP("ftp://$(email):$(email)@arthurhou.pps.eosdis.nasa.gov")
-end
-
-function pmmnrtftpopen()
-    email = "natgeo.wong%40outlook.com"
-    @info "$(Dates.now()) - Opening FTP request to jsimpson.pps.eosdis.nasa.gov."
-    return FTP("ftp://$(email):$(email)@jsimpson.pps.eosdis.nasa.gov")
+    @info "$(Dates.now()) - Opening FTP request to $(server).pps.eosdis.nasa.gov."
+    return FTP("ftp://$(email):$(email)@$(server).pps.eosdis.nasa.gov")
 end
 
 function pmmftpclose(ftp)
