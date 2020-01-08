@@ -10,11 +10,7 @@ using ClimateEasy
 
 ## Exporting the following functions:
 export
-        clisatroot, pmmfinftpopen, pmmnrtftpopen, pmmftpclose,
-        gpmfroot, gpmlroot, gpmeroot, trmmroot, mimicroot,
-        gpmffol, gpmlfol, gpmefol, trmmfol, mimicfol,
-        gpmfncfile, gpmlncfile, gpmencfile, trmmncfile, mimicfile,
-        gpmfrun, gpmlrun, gpmerun, trmmrun, mimicrun
+        clisatroot, clisatrun, clisatread
 
 ## Including other files in the module
 include("startup.jl")
