@@ -5,7 +5,7 @@ module ClimateSatellite
 
 ## Modules Used
 using Dates, Printf
-using NetCDF, HDF5, FTPClient, PyCall
+using NCDatasets, HDF5, FTPClient, PyCall
 using ClimateEasy
 
 ## Exporting the following functions:
