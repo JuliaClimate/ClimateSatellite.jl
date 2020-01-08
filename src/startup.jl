@@ -1,9 +1,8 @@
 """
-This file initializes the ClimateSatellite module by providing the basic
-functions that are applicable to all the different satellites.  Current
-functionalities include:
+This file initializes the ClimateSatellite module by providing the basic functions that are
+applicable to all the different satellites.  Current functionalities include:
     - detection of home directory
-    - ftp open for arthuhou
+    - ftp open for arthuhou and jsimpson (GPM / TRMM data)
 
 """
 
@@ -37,8 +36,7 @@ function clisatroot(product::AbstractString,path::AbstractString)
 end
 
 # FTP Functions
-function pmmftpopen(server::AbstractString)
-    email = "natgeo.wong%40outlook.com"
+function pmmftpopen(server::AbstractString,email::AbstractString)
     @info "$(Dates.now()) - Opening FTP request to $(server).pps.eosdis.nasa.gov."
     return FTP("ftp://$(email):$(email)@$(server).pps.eosdis.nasa.gov")
 end
@@ -50,9 +48,10 @@ end
 
 # Run
 function clisatrun(year::Integer;
+                   product::AbstractString,
+                   email::AbstractString,
                    dataroot::AbstractString="",
-                   regions::AbstractArray=["GLB"],
-                   product::AbstractString)
+                   regions::AbstractArray=["GLB"])
 
     if dataroot == ""; dataroot = clisatroot(product); end
 
@@ -61,4 +60,16 @@ function clisatrun(year::Integer;
 
 end
 
-function clisatdwn(product::AbstractString)
+
+function clisatrun(date::TimeType;
+                   product::AbstractString,
+                   email::AbstractString,
+                   dataroot::AbstractString="",
+                   regions::AbstractArray=["GLB"])
+
+    if dataroot == ""; dataroot = clisatroot(product); end
+
+    data,grid = clisatdwn(product,year,dataroot,regions);
+    clisatsave(product,data,grid,year,dataroot,regions);
+
+end
