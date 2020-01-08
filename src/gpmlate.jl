@@ -127,7 +127,7 @@ function gpmldwn(date,sroot::AbstractString,overwrite=false)
     if !isdir(tdir) mkpath(tdir); end
 
     fH5 = gpmldt(date);
-    ftp = pmmnrtftpopen(); gpmlftpcd(date,ftp);
+    ftp = pmmftpopen("jsimpson"); gpmlftpcd(date,ftp);
     @info "$(Dates.now()) - Downloading GPM Near-RealTime (Late) precipitation data for $(Date(date))"
     for ii = 1 : length(fH5)
         fH5ii = fH5[ii];
