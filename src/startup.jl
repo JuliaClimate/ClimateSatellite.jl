@@ -45,31 +45,3 @@ function pmmftpclose(ftp)
     @info "$(Dates.now()) - Closing FTP request."
     close(ftp)
 end
-
-# Run
-function clisatrun(year::Integer;
-                   product::AbstractString,
-                   email::AbstractString,
-                   dataroot::AbstractString="",
-                   regions::AbstractArray=["GLB"])
-
-    if dataroot == ""; dataroot = clisatroot(product); end
-
-    data,grid = clisatdwn(product,year,dataroot,regions);
-    clisatsave(product,data,grid,year,dataroot,regions);
-
-end
-
-
-function clisatrun(date::TimeType;
-                   product::AbstractString,
-                   email::AbstractString,
-                   dataroot::AbstractString="",
-                   regions::AbstractArray=["GLB"])
-
-    if dataroot == ""; dataroot = clisatroot(product); end
-
-    data,grid = clisatdwn(product,year,dataroot,regions);
-    clisatsave(product,data,grid,year,dataroot,regions);
-
-end
