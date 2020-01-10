@@ -45,3 +45,7 @@ function pmmftpclose(ftp)
     @info "$(Dates.now()) - Closing FTP request."
     close(ftp)
 end
+
+function isprod(info::Dict,product::AbstractString)
+    occursin(product,info["productID"])
+end
