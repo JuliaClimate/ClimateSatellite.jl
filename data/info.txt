@@ -1,7 +1,7 @@
-#(1)ProductID (2)Source (3)Product (4)Variable (5)VariableID
-pmm_imerg,PMM,IMERG,Precipitation,prcp_tot
-pmm_gpm_lnrt,PMM,GPM Near-Realtime(Late),Precipitation,prcp_tot
-pmm_gpm_enrt,PMM,GPM Near-Realtime(Early),Precipitation,prcp_tot
-pmm_trmm3b42,PMM,TRMM 3B42,Precipitation,prcp_tot
-mimic_tpw2m,MIMIC,TPW2m,Total Precipitable Water,tpw
-rss_tmi,RSS,TRMM Microwave Imager,
+#(1)ProductID (2)Source (3)Product (4)Product Shorthand (5)Variable (6)VariableID
+pmm_imerg,PMM,IMERG,gpmimerg,Precipitation,prcp_tot
+pmm_gpm_lnrt,PMM,GPM Near-Realtime(Late),gpmlate,Precipitation,prcp_tot
+pmm_gpm_enrt,PMM,GPM Near-Realtime(Early),gpmearly,Precipitation,prcp_tot
+pmm_trmm3b42,PMM,TRMM 3B42,trmm3b42,Precipitation,prcp_tot
+mimic_tpw2m,MIMIC,TPW2m,mtpw2m,Total Precipitable Water,tpw
+rss_tmi,RSS,TRMM Microwave Imager,rsstmi,
