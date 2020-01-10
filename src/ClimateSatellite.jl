@@ -10,7 +10,7 @@ using ClimateEasy
 
 ## Exporting the following functions:
 export
-        clisatroot, pmmfinftpopen, pmmnrtftpopen, pmmftpclose,
+        clisatroot, pmmftpopen, pmmftpclose,
         gpmfroot, gpmlroot, gpmeroot, trmmroot, mimicroot,
         gpmffol, gpmlfol, gpmefol, trmmfol, mimicfol,
         gpmfncfile, gpmlncfile, gpmencfile, trmmncfile, mimicfile,
