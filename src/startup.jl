@@ -7,7 +7,7 @@ applicable to all the different satellites.  Current functionalities include:
 """
 
 # Root Functions
-function clisatroot(product::AbstractString)
+function clisatroot(productID::AbstractString)
 
     path = joinpath("$(homedir())","research","CliSat",product);
     @info "$(Dates.now()) - No directory path was given.  Setting to default path: $(path) for ClimateSatellite data downloads."
@@ -23,7 +23,7 @@ function clisatroot(product::AbstractString)
 
 end
 
-function clisatroot(product::AbstractString,path::AbstractString)
+function clisatroot(productID::AbstractString,path::AbstractString)
     pdir = joinpath(path,product);
     if isdir(pdir)
         @info "$(Dates.now()) - The path $(path) exists and therefore can be used as a directory for ClimateSatellite data downloads."

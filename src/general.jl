@@ -6,20 +6,20 @@ This file contains all the front-end scripts in ClimateSatellite.jl that are for
 
 """
 
-function clisatinfo(product::AbstractString,productattr::Dict)
+function clisatinfo(productID::AbstractString,productattr::Dict)
 
 end
 
 function clisatdwn(
     year::Integer;
-    product::AbstractString, email::AbstractString,
+    productID::AbstractString, email::AbstractString,
     dataroot::AbstractString="", regions::Array{String,1}=["GLB"]
 )
 
     if dataroot == ""; dataroot = clisatroot(product); end
 
     info = Dict();
-    info = clisatinfo(product,info);
+    info = clisatinfo(productID,info);
 
     if info["satellite"] = "GPM"
         if     info["product"] = "early"; gpmedwn(regions,year,info,email);
