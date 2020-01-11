@@ -3,12 +3,12 @@ using Dates
 using PyCall,PyPlot
 
 cd("/Users/natgeo-wong")
-#mimicrun(Date(2019,1,1),clisatroot(),["ENSO"])
+#mimicrun(Date(2019,1,1),clisatroot(),)
 
-cd("/Users/natgeo-wong/Documents/Research/MIMIC/ENSO/2019/01/");
-tpw_ENSO = ncread("mimic_ENSO_tpw_20190101.nc","tpw");
-lon_ENSO = ncread("mimic_ENSO_tpw_20190101.nc","lon");
-lat_ENSO = ncread("mimic_ENSO_tpw_20190101.nc","lat");
+cd("/Users/natgeo-wong/Research/data/MIMIC/GLB/2019/01/");
+tpw_ENSO = ncread("mimic_GLB_tpw_20190101.nc","tpw");
+lon_ENSO = ncread("mimic_GLB_tpw_20190101.nc","lon");
+lat_ENSO = ncread("mimic_GLB_tpw_20190101.nc","lat");
 
 close("all")
 ccrs = pyimport("cartopy.crs");
