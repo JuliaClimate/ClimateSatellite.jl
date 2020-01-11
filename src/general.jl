@@ -3,10 +3,32 @@ This file contains all the front-end scripts in ClimateSatellite.jl that are for
     * downloading data (calls different backend functions based on satellite/product type)
     * saving of data, with details of satellite/product attributes taken from a `Dict`
     * satellite/product attribute information retrieval
+    * creation of folders (both data folders and temporary directories)
 
 """
 
-function clisatinfo(productID::AbstractString,productattr::Dict)
+function clisatinfo!(productattr::Dict,productID::AbstractString)
+
+    fileinfo = readlines(joinpath(@__DIR__,"../data/info.txt"))
+    info = Array{AbstractString,2}(undef,length(fileinfo)-1,7)
+
+    for ii = 2 : length(fileinfo)
+
+        row = fileinfo[ii];
+        if row[1] != "#"
+            str = split(row,","); vinfo = reshape(str[5:end],3,:);
+            info[ii,1:4] .= str[1:4];  info[ii,5] = [vinfo[1,:]];
+            info[ii,6] = [vinfo[2,:]]; info[ii,7] = [vinfo[3,:]];
+        end
+
+    end
+
+    ID = (info[:,1] .== productID);
+    productattr["source"]   = info[ID,2]; productattr["short"] = info[ID,4];
+    productattr["product"]  = info[ID,3]; productattr["varID"] = info[ID,6];
+    productattr["variable"] = info[ID,5]; productattr["units"] = info[ID,7];
+
+    return
 
 end
 
@@ -15,8 +37,20 @@ function clisatfol(info::Dict,date::TimeType,region::AbstractString)
     fol = joinpath(info["root"],region,yr2str(date));
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["satellite"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
         @info "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+    end
+
+    return fol
+
+end
+
+function clisattmp(info::Dict)
+
+    fol = joinpath(info["root"],"tmp");
+
+    if !isdir(fol)
+        @debug "$(Dates.now()) - Creating temporary directory $(fol)."; mkpath(fol);
     end
 
     return fol
@@ -26,16 +60,16 @@ end
 function clisatdwn(
     year::Integer;
     productID::AbstractString, email::AbstractString,
-    dataroot::AbstractString="", regions::Array{String,1}=["GLB"]
+    dataroot::AbstractString="", regions::Array{AbstractString,1}=["GLB"]
 )
 
     if dataroot == ""; dataroot = clisatroot(product); end
 
     info = Dict("root"=>dataroot,"email"=>email);
-    info = clisatinfo(productID,info);
+    info = clisatinfo(info,productID);
 
     if info["source"] == "PMM"
-        if     isprod(info,"imerg");   gpmedwn(regions,year,info,email);
+        if     isprod(info,"imerg");   gpmfdwn(regions,year,info,email);
         elseif isprod(info,"3b42");    trmmdwn(regions,year,info,email);
         else;                          gpmndwn(regions,year,info,email);
         end
@@ -73,12 +107,12 @@ function clisatsave(
         rm(fnc);
     end
 
-    @debug "$(Dates.now()) - Creating $(info["satellite"]) $(info["product"]) $(info["variable"]) netCDF file $(fnc) ..."
+    @debug "$(Dates.now()) - Creating $(info["source"]) $(info["product"]) $(info["variable"]) netCDF file $(fnc) ..."
     nccreate(fnc,var_var,"nlon",nlon,"nlat",nlat,"ntime",nt,atts=att_prcp,t=NC_FLOAT);
     nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
     nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
 
-    @info "$(Dates.now()) - Saving $(info["satellite"]) $(info["product"]) $(info["variable"]) data to netCDF file $(fnc) ..."
+    @info "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) $(info["variable"]) data to netCDF file $(fnc) ..."
     ncwrite(data,fnc,var_var);
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat);
