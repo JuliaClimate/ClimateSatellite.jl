@@ -22,13 +22,10 @@ export
 
 ## Including other files in the module
 include("startup.jl")
-
-include("gpmfinal.jl")
-include("gpmlate.jl")
-include("gpmearly.jl")
-include("trmm.jl")
-
-include("mimic.jl")
+include("general.jl")
+include("gpm.jl")
+#include("trmm.jl")
+#include("mimic.jl")
 #include("modis.jl")
 #include("rss.jl")
 

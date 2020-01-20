@@ -22,7 +22,16 @@ function gpmfdwn(
 
     tdir = clisattmp(info); if !isdir(tdir) mkpath(tdir); end
 
-    ftp = gpmftp(info);f H5 = gpmfdt(date); gpmftpcd(date,ftp);
+    ftp = gpmftp(info);
+
+    dvec = Date(year,1,1):Days(1):Date(year,12,31)
+    for date in dvec
+
+        gpmftpcd(date,ftp);
+
+    end
+
+    H5 = gpmfdt(date); gpmftpcd(date,ftp);
 
     @info "$(Dates.now()) - Downloading $(info["source"]) $(info["product"]) $(info["variable"]) data for $(Date(date))"
     for ii = 1 : length(fH5)
