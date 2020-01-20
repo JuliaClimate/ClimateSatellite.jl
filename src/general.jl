@@ -120,7 +120,7 @@ function clisatsave(
     fol = clisatfol(info,date,region);
     @debug "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
 
-    if isfile(joinpath(fol,fnc); @info "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
+    if isfile(joinpath(fol,fnc)); @info "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
 
     mv(fnc,joinpath(fol,fnc),force=true);
 
