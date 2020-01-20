@@ -127,7 +127,7 @@ function gpmfdwn(date,sroot::AbstractString,overwrite=false)
     if !isdir(tdir) mkpath(tdir); end
 
     fH5 = gpmfdt(date);
-    ftp = pmmftpopen("arthurhoe"); gpmfftpcd(date,ftp);
+    ftp = pmmftpopen("arthurhou"); gpmfftpcd(date,ftp);
     @info "$(Dates.now()) - Downloading GPM Research (Final) precipitation data for $(Date(date))"
     for ii = 1 : length(fH5)
         fH5ii = fH5[ii];
