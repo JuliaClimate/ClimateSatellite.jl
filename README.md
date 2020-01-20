@@ -15,10 +15,10 @@ will mostly be on satellite missions involving these variables (i.e. PMM (GPM/TR
 
 `ClimateSatellite.jl` currently supports the retrieval of data from the following satellites/
 missions:
-* Global Precipitation Mission (GPM) Research Product
-* Global Precipitation Mission (GPM) Late NRT Product
-* Global Precipitation Mission (GPM) Early NRT Product
-* Morphed Integrated Microwave Imagery at CIMSS (MIMIC)-TPW2m
+* Global Precipitation Mission (GPM) Research Product (GPM-FINAL)
+* Global Precipitation Mission (GPM) Late NRT Product (GPM-LATE)
+* Global Precipitation Mission (GPM) Early NRT Product (GPM-EARLY)
+* Morphed Integrated Microwave Imagery at CIMSS (MIMIC)-TPW2m (MIMIC)
 
 The retrieval of the following satellites/missions are in development:
 * Tropical Rainfall Measuring Mission (TRMM)
@@ -40,7 +40,5 @@ properties, units of measurement, etc.
 ## Workflow
 By default, `ClimateSatellite.jl` saves all data into a `data` repository that is user-specified, or else it will otherwise default to
 ```
-datadir="~/research/clisat/$(satellite_acronym)"
+datadir="~/research/data/$(satellite_acronym)"
 ```
-
-where `satellite_acronym` is found in `satellites.txt`.
