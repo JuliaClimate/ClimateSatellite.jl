@@ -57,29 +57,32 @@ function clisattmp(info::Dict)
 
 end
 
+function clisatncname(info::Dict,date::TimeType,region::AbstractString);
+    return "$(info["short"])_$(region)_$(ymd2str(date)).nc"
+end
+
 function clisatdwn(
-    year::Integer;
+    yr::Integer;
     productID::AbstractString, email::AbstractString,
     dataroot::AbstractString="", regions::Array{AbstractString,1}=["GLB"]
 )
 
     if dataroot == ""; dataroot = clisatroot(product); end
 
-    info = Dict("root"=>dataroot,"email"=>email);
+    info = Dict("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
     info = clisatinfo(info,productID);
 
     if info["source"] == "PMM"
-        if     isprod(info,"imerg");   gpmfdwn(regions,year,info,email);
-        elseif isprod(info,"3b42");    trmmdwn(regions,year,info,email);
-        else;                          gpmndwn(regions,year,info,email);
+        if     isprod(info,"gpm");     gpmdwn(regions,yr,info);
+        elseif isprod(info,"3b42");    trmmdwn(regions,yr,info,email);
         end
-    elseif info["source"] == "MIMIC";  mtpwdwn(regions,year,info);
+    elseif info["source"] == "MIMIC";  mtpwdwn(regions,yr,info);
     elseif info["source"] == "RSS"
-        if     isprod(info,"trmm");    rtmidwn(regions,year,info,email);
-        elseif isprod(info,"gpm");     rgmidwn(regions,year,info,email);
-        elseif isprod(info,"smif");    rsmidwn(regions,year,info,email);
-        elseif isprod(info,"windsat"); rwnddwn(regions,year,info,email);
-        elseif isprod(info,"amsr");    rmsrdwn(regions,year,info,email);
+        if     isprod(info,"trmm");    rtmidwn(regions,yr,info,email);
+        elseif isprod(info,"gpm");     rgmidwn(regions,yr,info,email);
+        elseif isprod(info,"smif");    rsmidwn(regions,yr,info,email);
+        elseif isprod(info,"windsat"); rwnddwn(regions,yr,info,email);
+        elseif isprod(info,"amsr");    rmsrdwn(regions,yr,info,email);
         end
     end
 
@@ -90,10 +93,8 @@ function clisatsave(
     region::AbstractString, info::Dict, date::TimeType
 )
 
-    fnc = clisatncfile(info,date,region);
-    nlon = size(data,1); lon = info["longitude"];
-    nlat = size(data,2); lat = info["latitude"];
-    nt   = size(data,3);
+    fnc = clisatncname(info,date,region);
+    nlon = size(data,1); nlat = size(data,2); nt = size(data,3);
 
     if nlon != length(lon); error("$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements") end
     if nlat != length(lat); error("$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements") end
