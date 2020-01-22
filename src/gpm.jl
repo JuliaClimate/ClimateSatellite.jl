@@ -105,7 +105,7 @@ function gpmretrieve(
 end
 
 function gpmextract(
-    reg::AbstractString="GLB", fH5::Array{AbstractString,2}, fol::AbstractString
+    fH5::Array{AbstractString,2}, fol::AbstractString, reg::AbstractString="GLB"
 )
 
     lon,lat = gpmlonlat(); nlon = length(lon); nlat = length(lat)
@@ -151,7 +151,7 @@ function gpmdwn(
         fH5 = gpmh5list(yr,mo,ndy,info); gpmretrieve(fH5,dateii,ndy,tdir,info);
 
         for reg in regions
-            data,grid = gpmextract(reg,fH5,tdir); clisatsave(data,grid,reg,info,dateii)
+            data,grid = gpmextract(fH5,tdir,reg); clisatsave(data,grid,reg,info,dateii)
         end
 
     end
