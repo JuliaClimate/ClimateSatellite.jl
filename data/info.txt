@@ -1,7 +1,7 @@
 #(1)ProductID (2)Source (3)Product (4)Product Shorthand (5)Variable (6)VariableID (7)Units
-pmm_imerg,PMM,IMERG,gpmimerg,Precipitation Rate,prcp_rate
-pmm_gpm_lnrt,PMM,GPM Near-Realtime(Late),gpmlate,Precipitation Rate,prcp_rate
-pmm_gpm_enrt,PMM,GPM Near-Realtime(Early),gpmearly,Precipitation Rate,prcp_rate
-pmm_trmm3b42,PMM,TRMM 3B42,trmm3b42,Precipitation Rate,prcp_rate
+pmm_imerg,PMM,GPM IMERG,gpmimerg,Precipitation Rate,prcp_rate,mm/hr
+pmm_gpm_lnrt,PMM,GPM Near-Realtime (Late),gpmlate,Precipitation Rate,prcp_rate,mm/hr
+pmm_gpm_enrt,PMM,GPM Near-Realtime (Early),gpmearly,Precipitation Rate,prcp_rate,mm/hr
+pmm_trmm3b42,PMM,TRMM 3B42,trmm3b42,Precipitation Rate,prcp_rate,mm/hr
 mimic_tpw2m,MIMIC,TPW2m,mtpw2m,Total Precipitable Water,tpw,mm
 rss_tmi,RSS,TRMM Microwave Imager,rsstmi,
