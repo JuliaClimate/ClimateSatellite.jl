@@ -47,7 +47,7 @@ function gpmh5list(yr::Integer, mo::Integer, ndy::Integer, info::Dict)
             else;       dtstr = "$(ymd2str(date))-S$(hr)3000-E$(hr)5959.$(id)."
             end
 
-            fname[hh,dy] = "$(info["prefix"]).$(dtstr).$(info["suffix"])"
+            fH5[hh,dy] = "$(info["prefix"]).$(dtstr).$(info["suffix"])"
 
         end
     end
@@ -59,7 +59,7 @@ function gpmftpcd(date::TimeType,ftp)
 
     @info "$(Dates.now()) - Entering IMERG directory for $(yrmostr(date))."
 
-    if info["short"] == "gpmimerg"
+    if     info["short"] == "gpmimerg"
         cd(ftp,"gpmdata/$(yrmo2dir(date))")
     elseif info["short"] == "gpmlate"
         cd(ftp,"NRTPUB/imerg/late/$(yrmo2str(date))/")
@@ -123,12 +123,12 @@ function gpmextract(
             rawii = h5read("$(fH5ii)","/Grid/precipitationCal");
             @debug "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
             permutedims!(raw,rawii,[2,1,3]);
-            tmp = regionextractgrid(raw,reg,lon,lat,rawi)
+            tmp .= regionextractgrid(raw,reg,lon,lat,rawi)
             real2int16!(data[:,:,ii],tmp,offset=163.835,scale=1/200);
 
         else
 
-            @info "$(Dates.now()) - $(fH5ii) does not exist.  GPM Research (Final) precipitation data values set to NaN."
+            @info "$(Dates.now()) - $(fH5ii) does not exist.  All values set to NaN."
             data[:,:,ii] .= -32768;
 
         end
