@@ -1,7 +1,7 @@
 name = "ClimateSatellite"
 uuid = "d91beb5f-3141-4656-855d-efd5d97b23c4"
 authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 ClimateEasy = "47ceb0c8-0fe6-4c49-a4a1-92bc59187c00"
@@ -14,7 +14,7 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 
 [compat]
-ClimateEasy = "0.1"
+ClimateEasy = "0.2"
 FTPClient = "1.0"
 HDF5 = "0.12"
 NetCDF = "0.8"
