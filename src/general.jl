@@ -58,7 +58,7 @@ function clisattmp(info::Dict)
 end
 
 function clisatncname(info::Dict,date::TimeType,region::AbstractString);
-    return "$(info["short"])_$(region)_$(ymd2str(date)).nc"
+    return "$(info["short"])-$(region)-$(ymd2str(date)).nc"
 end
 
 function clisatdwn(
