@@ -1,7 +1,8 @@
-#(1)ProductID,(2)Source,(3)Product,(4)Variable,(5)VariableID,(6)Units
-gpmimerg,PMM,GPM IMERG,Precipitation Rate,prcp_rate,mm/hr
-gpmlate,PMM,GPM NRT-(Late),Precipitation Rate,prcp_rate,mm/hr
-gpmearly,PMM,GPM NRT-(Early),Precipitation Rate,prcp_rate,mm/hr
-trmm3b42,PMM,TRMM 3B42,Precipitation Rate,prcp_rate,mm/hr
-mtpw2m,MIMIC,TPW2m,Total Precipitable Water,tpw,mm
-rsstmi,RSS,TRMM Microwave Imager,Precipitable Water,tpw,mm,Precipitation Rate,prcp_rate,mm/hr
+#(1)Product ID,(2)Source,(3)Product,(4)Variable ID,(5)Standard Name,(6)Long Name,(7)Units,(8)Scale Factor,(9)Offset
+gpmimerg,PMM,GPM IMERG,prcp_rate,lwe_precipitation_rate,Precipitation Rate,m s-1,0.018,163.835
+gpmlate,PMM,GPM NRT-(Late),prcp_rate,lwe_precipitation_rate,Precipitation Rate,m s-1,0.018,163.835
+gpmearly,PMM,GPM NRT-(Early),prcp_rate,lwe_precipitation_rate,Precipitation Rate,m s-1,0.018,163.835
+trmm3b42,PMM,TRMM 3B42,prcp_rate,lwe_precipitation_rate,Precipitation Rate,m s-1,0.018,163.835
+mtpw2m,MIMIC,TPW2m,tpw,lwe_thickness_of_atmosphere_mass_content_of_water_vapor,Total Precipitable Water,m,1.83111E-06,60
+#rsstmi,RSS,TRMM Microwave Imager,tpw,lwe_thickness_of_atmosphere_mass_content_of_water_vapor,Total Precipitable Water,m,,
+#rsstmi,RSS,TRMM Microwave Imager,prcp_rate,lwe_precipitation_rate,Precipitation Rate,m s-1,,

@@ -137,7 +137,7 @@ function gpmextract(
             @debug "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
             permutedims!(raw,rawii,[2,1,3]);
             tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
-            real2int16!(data[:,:,ii],tmp,offset=163.835,scale=1/200);
+            real2int16!(data[:,:,ii],tmp,offset=info["offset"],scale=info["scale"]);
 
         else
 

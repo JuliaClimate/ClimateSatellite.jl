@@ -28,7 +28,9 @@ function clisatinfo!(productattr::Dict,productID::AbstractString)
     ID = (info[:,1] .== productID);
     productattr["source"]   = info[ID,2][1]; productattr["short"] = info[ID,1][1];
     productattr["product"]  = info[ID,3][1]; productattr["varID"] = info[ID,5][1];
-    productattr["variable"] = info[ID,4][1]; productattr["units"] = info[ID,6][1];
+    productattr["variable"] = info[ID,6][1]; productattr["units"] = info[ID,7][1];
+    productattr["standard"] = info[ID,5][1]; productattr["scale"] = info[ID,8][1];
+    productattr["offset"]   = info[ID,9][1];
 
     return
 
@@ -112,7 +114,7 @@ function clisatsave(
         var_var[ii]                  = info["varID"][ii];
         att_var[ii]["units"]         = info["units"][ii]
         att_var[ii]["standard_name"] = info["standard"][ii]
-        att_var[ii]["long_name"]     = info["long"][ii]
+        att_var[ii]["long_name"]     = info["variable"][ii]
         att_var[ii]["scale_factor"]  = info["scale"][ii]
         att_var[ii]["add_offset"]    = info["offset"][ii]
         att_var[ii]["missing_value"] = -32768
