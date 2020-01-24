@@ -1,4 +1,4 @@
-#(1)ProductID (2)Source (3)Product (4)Variable (5)VariableID (6)Units
+#(1)ProductID,(2)Source,(3)Product,(4)Variable,(5)VariableID,(6)Units
 gpmimerg,PMM,GPM IMERG,Precipitation Rate,prcp_rate,mm/hr
 gpmlate,PMM,GPM NRT-(Late),Precipitation Rate,prcp_rate,mm/hr
 gpmearly,PMM,GPM NRT-(Early),Precipitation Rate,prcp_rate,mm/hr
