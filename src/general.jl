@@ -135,7 +135,7 @@ function clisatsave(
     @debug "$(Dates.now()) - Creating $(info["source"]) $(info["product"]) $(info["variable"]) netCDF file $(fnc) ..."
 
     for ii = 1 : nvar
-        nccreate(fnc,var_var,"longitude",nlon,"latitude",nlat,"time",nt,
+        nccreate(fnc,var_var[ii],"longitude",nlon,"latitude",nlat,"time",nt,
                  atts=att_var[ii],t=NC_SHORT);
     end
 
@@ -145,8 +145,9 @@ function clisatsave(
 
     @info "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) $(info["variable"]) data to netCDF file $(fnc) ..."
 
-    for ii = 1 : nvar
-        ncwrite(data,fnc,var_var[ii]);
+    if nvar != 1
+        for ii = 1 : nvar; ncwrite(data[:,:,:,ii],fnc,var_var[ii]); end
+    else; ncwrite(data,fnc,var_var[ii]);
     end
 
     ncwrite(lon,fnc,var_lon);
