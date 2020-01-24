@@ -10,23 +10,25 @@ This file contains all the front-end scripts in ClimateSatellite.jl that are for
 function clisatinfo!(productattr::Dict,productID::AbstractString)
 
     fileinfo = readlines(joinpath(@__DIR__,"../data/info.txt"))
-    info = Array{AbstractString,2}(undef,length(fileinfo)-1,7)
+    info = Array{Any,2}(undef,length(fileinfo)-1,7)
 
-    for ii = 2 : length(fileinfo)
+    for ii = 1 : length(fileinfo)-1
 
-        row = fileinfo[ii];
-        if row[1] != "#"
+        row = fileinfo[ii+1];
+        if row[1] != '#'
             str = split(row,","); vinfo = reshape(str[5:end],3,:);
             info[ii,1:4] .= str[1:4];  info[ii,5] = [vinfo[1,:]];
             info[ii,6] = [vinfo[2,:]]; info[ii,7] = [vinfo[3,:]];
+        else
+            info[ii,:] .= "missing";
         end
 
     end
 
     ID = (info[:,1] .== productID);
-    productattr["source"]   = info[ID,2]; productattr["short"] = info[ID,4];
-    productattr["product"]  = info[ID,3]; productattr["varID"] = info[ID,6];
-    productattr["variable"] = info[ID,5]; productattr["units"] = info[ID,7];
+    productattr["source"]   = info[ID,2][1]; productattr["short"] = info[ID,4][1];
+    productattr["product"]  = info[ID,3][1]; productattr["varID"] = info[ID,6][1];
+    productattr["variable"] = info[ID,5];    productattr["units"] = info[ID,7];
 
     return
 
@@ -62,29 +64,32 @@ function clisatncname(info::Dict,date::TimeType,region::AbstractString);
 end
 
 function clisatdwn(
-    yr::Integer;
+    date::TimeType;
     productID::AbstractString, email::AbstractString,
-    dataroot::AbstractString="", regions::Array{AbstractString,1}=["GLB"]
+    dataroot::AbstractString="", regions::Array{<:AbstractString,1}=["GLB"],
+    overwrite::Bool=false
 )
 
-    if dataroot == ""; dataroot = clisatroot(product); end
+    if dataroot == ""; dataroot = clisatroot(productID); end
 
-    info = Dict("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
-    info = clisatinfo(info,productID);
+    info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
+    clisatinfo!(info,productID);
 
     if info["source"] == "PMM"
-        if     isprod(info,"gpm");     gpmdwn(regions,yr,info);
-        elseif isprod(info,"3b42");    trmmdwn(regions,yr,info,email);
+        if     isprod(info,"gpm");  gpmdwn(regions,date,info,overwrite=overwrite);
+        elseif isprod(info,"3b42"); trmmdwn(regions,date,info,overwrite=overwrite);
         end
-    elseif info["source"] == "MIMIC";  mtpwdwn(regions,yr,info);
+    elseif info["source"] == "MIMIC"; mtpwdwn(regions,date,info);
     elseif info["source"] == "RSS"
-        if     isprod(info,"trmm");    rtmidwn(regions,yr,info,email);
-        elseif isprod(info,"gpm");     rgmidwn(regions,yr,info,email);
-        elseif isprod(info,"smif");    rsmidwn(regions,yr,info,email);
-        elseif isprod(info,"windsat"); rwnddwn(regions,yr,info,email);
-        elseif isprod(info,"amsr");    rmsrdwn(regions,yr,info,email);
+        if     isprod(info,"trmm"); rtmidwn(regions,date,info,email,overwrite=overwrite);
+        elseif isprod(info,"gpm");  rgmidwn(regions,date,info,email,overwrite=overwrite);
+        elseif isprod(info,"smif"); rsmidwn(regions,date,info,email,overwrite=overwrite);
+        elseif isprod(info,"wind"); rwnddwn(regions,date,info,email,overwrite=overwrite);
+        elseif isprod(info,"amsr"); rmsrdwn(regions,date,info,email,overwrite=overwrite);
         end
     end
+
+    return info
 
 end
 
