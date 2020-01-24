@@ -9,7 +9,7 @@ and extraction of data from the GPM satellite of the Precipitation Measurement M
 
 function gpmftp(info::Dict)
 
-    if info["product"] != "IMERG"
+    if info["short"] != "gpmimerg"
           return pmmftpopen("jsimpson",info["email"])
     else; return pmmftpopen("arthurhou",info["email"])
     end
@@ -33,31 +33,35 @@ function gpmh5!(info::Dict)
 
 end
 
-function gpmh5list(yr::Integer, mo::Integer, ndy::Integer, info::Dict)
+function gpmh5list(date::TimeType, ndy::Integer, info::Dict)
 
-    fH5 = Array{AbstractString,2}(undef,48,ndy)
-    for dy = 1 : ndy; date = Date(yr,mo,ii);
+    fH5 = Array{String,2}(undef,48,ndy);
+    yr = Dates.year(date); mo = Dates.month(date);
+
+    @debug "$(Dates.now()) - Creating list of data files to download ..."
+    for dy = 1 : ndy; dateii = Date(yr,mo,dy);
         for hh = 1 : 48
 
             hr = (hh-1)/2; mi = mod(hr,1); hr = hr - mi;
             hr = @sprintf("%02d",hr);
             id = @sprintf("%04d",(hh-1)*30);
 
-            if mi == 0; dtstr = "$(ymd2str(date))-S$(hr)0000-E$(hr)2959.$(id)."
-            else;       dtstr = "$(ymd2str(date))-S$(hr)3000-E$(hr)5959.$(id)."
+            if mi == 0; dtstr = "$(ymd2str(dateii))-S$(hr)0000-E$(hr)2959.$(id)"
+            else;       dtstr = "$(ymd2str(dateii))-S$(hr)3000-E$(hr)5959.$(id)"
             end
 
             fH5[hh,dy] = "$(info["prefix"]).$(dtstr).$(info["suffix"])"
 
         end
     end
+
     return fH5
 
 end
 
-function gpmftpcd(date::TimeType,ftp)
+function gpmftpcd(date::TimeType,ftp,info::Dict)
 
-    @info "$(Dates.now()) - Entering IMERG directory for $(yrmostr(date))."
+    @info "$(Dates.now()) - Entering IMERG directory for $(date) ..."
 
     if     info["short"] == "gpmimerg"
         cd(ftp,"gpmdata/$(yrmo2dir(date))")
@@ -69,51 +73,61 @@ function gpmftpcd(date::TimeType,ftp)
 
 end
 
-function gpmget(ftp,file::AbstractString,tdir::AbstractString)
+function gpmget(ftp,file::AbstractString,tdir::AbstractString,overwrite::Bool)
 
-    try download(ftp,file,joinpath(tdir,file));
-        @debug "$(Dates.now()) - Downloaded GPM Near-RealTime (Late) precipitation data file $(file)"
-    catch; @info "$(Dates.now()) - GPM Near-RealTime (Late) precipitation data $(file) does not exist."
+    if overwrite && !isfile(joinpath(tdir,file))
+        try download(ftp,file,joinpath(tdir,file));
+            @debug "$(Dates.now()) - Downloaded data file $(file)"
+        catch; @warn "$(Dates.now()) - Data file $(file) does not exist."
+        end
     end
 
 end
 
 function gpmretrieve(
-    fH5::Array{AbstractString,2},
+    fH5::Array{String,2},
     date::TimeType, ndy::Integer,
-    tdir::AbstractString, info::Dict
+    tdir::AbstractString, info::Dict,
+    overwrite::Bool
 )
 
-    ftp = gpmftp(info); gpmftpcd(yr,mo,ftp);
+    @info "$(Dates.now()) - Starting data download of $(info["product"]) data for $(date) ..."
+
+    ftp = gpmftp(info); gpmftpcd(date,ftp,info);
 
     if info["short"] == "gpmimerg"
 
         for ii = 1 : ndy
             cd(ftp,"$(@sprintf("%02d",ii))/imerg");
-            for jj = 1 : 48; gpmget(ftp,fH5[jj,ii],tdir); end
+            for jj = 1 : 48; gpmget(ftp,fH5[jj,ii],tdir,overwrite); end
             cd(ftp,"../../")
         end
 
     else
 
-        for ii = 1 : length(fH5); gpmget(ftp,fH5[ii],tdir); end
+        for ii = 1 : length(fH5); gpmget(ftp,fH5[ii],tdir,overwrite); end
 
     end
 
     pmmftpclose(ftp);
+    @info "$(Dates.now()) - Data download of $(info["product"]) data for $(date) has been completed."
 
 end
 
 function gpmextract(
-    fH5::Array{AbstractString,2}, fol::AbstractString, reg::AbstractString="GLB"
+    fH5::Array{String,2}, fol::AbstractString, info::Dict, reg::AbstractString="GLB"
 )
 
-    lon,lat = gpmlonlat(); nlon = length(lon); nlat = length(lat)
-    rlon,rlat = regiongridvec(reg,lon,lat); nrlon = length(rlon); nrlat = length(rlat);
+    lon,lat = gpmlonlat(); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
+    nlon = length(lon); nrlon = length(rlon);
+    nlat = length(lat); nrlat = length(rlat);
 
-    data = Array{Int16,3}(undef,nrlon,nrlat,length(fH5));
-    raw  = Array{Real,2}(undef,nlon,nlat);
-    rawi = Array{Real,2}(undef,nlon,nlat);
+    data = zeros(Int16,nrlon,nrlat,length(fH5));
+    tmp  = zeros(nrlon,nrlat,1);
+    raw  = zeros(nlon,nlat,1);
+    rawi = zeros(nlon,nlat,1);
+
+    @info "$(Dates.now()) - Extracting regional $(info["product"]) data for $(rinfo["fullname"]) ..."
 
     for ii = 1 : length(fH5)
 
@@ -123,7 +137,7 @@ function gpmextract(
             rawii = h5read("$(fH5ii)","/Grid/precipitationCal");
             @debug "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
             permutedims!(raw,rawii,[2,1,3]);
-            tmp .= regionextractgrid(raw,reg,lon,lat,rawi)
+            tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
             real2int16!(data[:,:,ii],tmp,offset=163.835,scale=1/200);
 
         else
@@ -135,25 +149,21 @@ function gpmextract(
 
     end
 
+    @info "$(Dates.now()) - Extracted regional $(info["product"]) data for $(rinfo["fullname"])."
     return data,[rlon,rlat]
 
 end
 
 function gpmdwn(
-    regions::Array{AbstractString,1}, yr::Integer, info::Dict
+    regions::Array{<:AbstractString,1}, date::TimeType, info::Dict; overwrite::Bool
 )
 
     tdir = clisattmp(info); if !isdir(tdir) mkpath(tdir); end; gpmh5!(info)
+    ndy = daysinmonth(date); fH5 = gpmh5list(date,ndy,info);
+    #gpmretrieve(fH5,date,ndy,tdir,info,overwrite);
 
-    for mo = 1 : 12;
-
-        dateii = Date(yr,mo); ndy = daysinmonth(yr,mo);
-        fH5 = gpmh5list(yr,mo,ndy,info); gpmretrieve(fH5,dateii,ndy,tdir,info);
-
-        for reg in regions
-            data,grid = gpmextract(fH5,tdir,reg); clisatsave(data,grid,reg,info,dateii)
-        end
-
+    for reg in regions
+        data,grid = gpmextract(fH5,tdir,info,reg); #clisatsave(data,grid,reg,info,date)
     end
 
 end
