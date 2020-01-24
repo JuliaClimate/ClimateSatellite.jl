@@ -35,7 +35,7 @@ end
 
 function gpmh5list(date::TimeType, ndy::Integer, info::Dict)
 
-    fH5 = Array{String,2}(undef,48,ndy);
+    fH5 = Array{<:AbstractString,2}(undef,48,ndy);
     yr = Dates.year(date); mo = Dates.month(date);
 
     @debug "$(Dates.now()) - Creating list of data files to download ..."
@@ -115,7 +115,8 @@ function gpmretrieve(
 end
 
 function gpmextract(
-    fH5::Array{String,2}, fol::AbstractString, info::Dict, reg::AbstractString="GLB"
+    fH5::Array{<:AbstractString,2}, fol::AbstractString, info::Dict,
+    reg::AbstractString="GLB"
 )
 
     lon,lat = gpmlonlat(); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
@@ -123,9 +124,7 @@ function gpmextract(
     nlat = length(lat); nrlat = length(rlat);
 
     data = zeros(Int16,nrlon,nrlat,length(fH5));
-    tmp  = zeros(nrlon,nrlat,1);
-    raw  = zeros(nlon,nlat,1);
-    rawi = zeros(nlon,nlat,1);
+    rawi = zeros(nlon,nlat,1); raw = zeros(nlon,nlat,1); tmp = zeros(nrlon,nrlat,1);
 
     @info "$(Dates.now()) - Extracting regional $(info["product"]) data for $(rinfo["fullname"]) ..."
 

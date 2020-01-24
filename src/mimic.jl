@@ -13,9 +13,12 @@ function mimiclonlat()
     return lon,lat
 end
 
-function mimicnclist(yr::Integer, mo::Integer, ndy::Integer)
+function mimicnclist(date::TimeType)
 
-    fname = Array{AbstractString,2}(undef,48,ndy)
+    fname = Array{<:AbstractString,1}(undef,48*ndy);
+    yr = Dates.year(date); mo = Dates.month(date); ndy = daysinmonth(date);
+
+    @debug "$(Dates.now()) - Creating list of data files to download ..."
     for dy = 1 : ndy; date = Date(yr,mo,ii);
         for hh = 1 : 24
 
@@ -30,46 +33,61 @@ function mimicnclist(yr::Integer, mo::Integer, ndy::Integer)
 
 end
 
-function mimicget(url,file::AbstractString,tdir::AbstractString)
-
-    try download("$(url)/$(file)",joinpath(tdir,file));
-        @debug "$(Dates.now()) - Downloaded MIMIC tropospheric precipitable water data file $(file)"
-    catch;
-        @info "$(Dates.now()) - MIMIC tropospheric precipitable water data $(file) does not exist."
+function mimicget(
+    url::AbstractString,
+    file::AbstractString,
+    tdir::AbstractString,
+    overwrite::Bool
+)
+    if overwrite && !isfile(joinpath(tdir,file))
+        try download("$(url)/$(file)",joinpath(tdir,file));
+            @debug "$(Dates.now()) - Downloaded MIMIC tropospheric precipitable water data file $(file)"
+        catch;
+            @warn "$(Dates.now()) - MIMIC tropospheric precipitable water data $(file) does not exist."
+        end
     end
 
 end
 
 function mimicretrieve(
-    fname::Array{AbstractString,2}, furl::Array{AbstractString,2}, tdir::AbstractString
+    fname::Array{<:AbstractString,2},
+    furl::Array{<:AbstractString,2},
+    tdir::AbstractString, info::Dict, overwrite::Bool
 )
 
-    for ii = 1 : length(fname); mimicget(furl,fname[ii],tdir); end
+    @info "$(Dates.now()) - Starting data download of $(info["product"]) data for $(date) ..."
+
+    for ii = 1 : length(fname); mimicget(furl,fname[ii],tdir,overwrite); end
+
+    @info "$(Dates.now()) - Data download of $(info["product"]) data for $(date) has been completed."
 
 end
 
 function mimicextract(
-    fname::Array{AbstractString,2}, fol::AbstractString, reg::AbstractString="GLB"
+    fname::Array{<:AbstractString,2}, fol::AbstractString, info::Dict,
+    reg::AbstractString="GLB"
 )
 
-    lon,lat = mimiclonlat(); nlon = length(lon); nlat = length(lat)
-    rlon,rlat = regiongridvec(reg,lon,lat); nrlon = length(rlon); nrlat = length(rlat);
+    lon,lat = mimiclonlat(); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
+    nlon = length(lon); nrlon = length(rlon);
+    nlat = length(lat); nrlat = length(rlat);
 
-    data = Array{Int16,3}(undef,nrlon,nrlat,length(fH5));
-    raw  = zeros(1440,721);
-    tmp  = Array{Real,2}(undef,nrlon,nrlat);
+    data = zeros(Int16,nrlon,nrlat,length(fname));
+    rawi = zeros(nlon,nlat); raw = zeros(nlon,nlat); tmp = zeros(nrlon,nrlat);
+
+    @info "$(Dates.now()) - Extracted regional $(info["product"]) data for $(rinfo["fullname"])."
 
     for ii = 1 : length(fname)
 
         fii = joinpath(fol,fname[ii]);
-        if isfile(fH5ii)
+        if isfile(fii)
 
             try
-                ncread!(fncii,"tpwGrid",raw);
-                tmp .= regionextractgrid(raw,reg,lon,lat,rawi)
+                ncread!(fii,"tpwGrid",raw);
+                tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
                 real2int16!(data[:,:,ii],tmp,offset=60,scale=60/32767);
             catch
-                @warn "$(Dates.now()) - Unable to extract/open $(fncii).  Setting MIMIC tropospheric precipitable water data values set to NaN."
+                @warn "$(Dates.now()) - Unable to extract/open $(fii).  Setting MIMIC tropospheric precipitable water data values set to NaN."
                 data[:,:,ii] .= -32768;
             end
 
@@ -82,25 +100,20 @@ function mimicextract(
 
     end
 
+    @info "$(Dates.now()) - Extracted regional $(info["product"]) data for $(rinfo["fullname"])."
     return data,[rlon,rlat]
 
 end
 
-function gpmdwn(
-    regions::Array{AbstractString,1}, yr::Integer, info::Dict
+function mimicdwn(
+    regions::Array{AbstractString,1}, date::TimeType, info::Dict; overwrite::Bool
 )
 
     tdir = clisattmp(info); if !isdir(tdir) mkpath(tdir); end
+    fname,furl = mimicnclist(date); mimicretrieve(fname,furl,tdir,info,overwrite);
 
-    for mo = 1 : 12;
-
-        dateii = Date(yr,mo); ndy = daysinmonth(yr,mo);
-        fname,furl = mimicnclist(yr,mo,ndy); mimicretrieve(fname,furl,tdir);
-
-        for reg in regions
-            data,grid = mimicextract(fname,tdir,reg); clisatsave(data,grid,reg,info,dateii)
-        end
-
+    for reg in regions
+        data,grid = mimicextract(fname,tdir,reg); clisatsave(data,grid,reg,info,date)
     end
 
 end
