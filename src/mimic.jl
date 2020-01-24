@@ -15,8 +15,8 @@ end
 
 function mimicnclist(date::TimeType)
 
-    fname = Array{<:AbstractString,1}(undef,48*ndy);
     yr = Dates.year(date); mo = Dates.month(date); ndy = daysinmonth(date);
+    fname = Array{<:AbstractString,1}(undef,48*ndy);
 
     @debug "$(Dates.now()) - Creating list of data files to download ..."
     for dy = 1 : ndy; date = Date(yr,mo,ii);

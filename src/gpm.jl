@@ -33,10 +33,10 @@ function gpmh5!(info::Dict)
 
 end
 
-function gpmh5list(date::TimeType, ndy::Integer, info::Dict)
+function gpmh5list(date::TimeType, info::Dict)
 
+    yr = Dates.year(date); mo = Dates.month(date); ndy = daysinmonth(date);
     fH5 = Array{<:AbstractString,2}(undef,48,ndy);
-    yr = Dates.year(date); mo = Dates.month(date);
 
     @debug "$(Dates.now()) - Creating list of data files to download ..."
     for dy = 1 : ndy; dateii = Date(yr,mo,dy);
@@ -86,14 +86,14 @@ end
 
 function gpmretrieve(
     fH5::Array{String,2},
-    date::TimeType, ndy::Integer,
+    date::TimeType,
     tdir::AbstractString, info::Dict,
     overwrite::Bool
 )
 
     @info "$(Dates.now()) - Starting data download of $(info["product"]) data for $(date) ..."
 
-    ftp = gpmftp(info); gpmftpcd(date,ftp,info);
+    ndy = daysinmonth(date); ftp = gpmftp(info); gpmftpcd(date,ftp,info);
 
     if info["short"] == "gpmimerg"
 
@@ -158,8 +158,7 @@ function gpmdwn(
 )
 
     tdir = clisattmp(info); if !isdir(tdir) mkpath(tdir); end; gpmh5!(info)
-    ndy = daysinmonth(date); fH5 = gpmh5list(date,ndy,info);
-    #gpmretrieve(fH5,date,ndy,tdir,info,overwrite);
+    fH5 = gpmh5list(date,info); #gpmretrieve(fH5,date,tdir,info,overwrite);
 
     for reg in regions
         data,grid = gpmextract(fH5,tdir,info,reg); #clisatsave(data,grid,reg,info,date)
