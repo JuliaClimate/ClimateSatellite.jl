@@ -168,23 +168,23 @@ function clisatsave(
     if nlat != length(lat); error("$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements") end
 
     var_var = AbstractVector{<:AbstractString}(undef,nvar)
-    att_var = map(x->Dict(),1:nvar)
+    att_var = map(x->Dict(Any,Any),1:nvar)
 
     for ii = 1 : nvar
         var_var[ii]                  = info["varID"][ii];
-        att_var[ii]["units"]         = info["units"][ii]
-        att_var[ii]["standard_name"] = info["standard"][ii]
-        att_var[ii]["long_name"]     = info["variable"][ii]
-        att_var[ii]["scale_factor"]  = info["scale"][ii]
-        att_var[ii]["add_offset"]    = info["offset"][ii]
-        att_var[ii]["missing_value"] = -32768
-        att_var[ii]["_FillValue"]    = -32768
+        att_var[ii]["units"]         = info["units"][ii];
+        att_var[ii]["standard_name"] = info["standard"][ii];
+        att_var[ii]["long_name"]     = info["variable"][ii];
+        att_var[ii]["scale_factor"]  = info["scale"][ii];
+        att_var[ii]["add_offset"]    = info["offset"][ii];
+        att_var[ii]["missing_value"] = -32768;
+        att_var[ii]["_FillValue"]    = -32768;
     end
 
-    var_lon = "longitude"; att_lon = Dict("units"=>"degrees_east","long_name"="longitude");
-    var_lat = "latitude";  att_lat = Dict("units"=>"degrees_north","long_name"="latitude");
+    var_lon = "longitude"; att_lon = Dict("units"=>"degrees_east","long_name"=>"longitude");
+    var_lat = "latitude";  att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
 
-    var_t = "time"; att_t = Dict("calendar"=>gregorian,"long_name"=>"time",
+    var_t = "time"; att_t = Dict("calendar"=>"gregorian","long_name"=>"time",
                                  "units"=>"minutes since $(Date.year(date))-$(Date.year(month))-1 0:0:0")
 
     if isfile(fnc)
