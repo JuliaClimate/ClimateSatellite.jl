@@ -13,7 +13,7 @@ export
         clisatroot, clisatdwn
 
 ## Including other files in the module
-include("startup.jl")
+#include("startup.jl")
 include("general.jl")
 include("gpm.jl")
 #include("trmm.jl")
