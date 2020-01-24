@@ -67,27 +67,30 @@ end
 function clisatinfo!(productattr::Dict,productID::AbstractString)
 
     fileinfo = readlines(joinpath(@__DIR__,"../data/info.txt"))
-    info = Array{Any,2}(undef,length(fileinfo)-1,7)
+    info = Array{Any,2}(undef,length(fileinfo)-1,9)
 
     for ii = 1 : length(fileinfo)-1
 
         row = fileinfo[ii+1];
-        if row[1] != '#'
-            str = split(row,","); vinfo = reshape(str[5:end],3,:);
-            info[ii,1:4] .= str[1:4]; info[ii,5] = vinfo[1,:];
-            info[ii,6] = vinfo[2,:];  info[ii,7] = vinfo[3,:];
-        else
-            info[ii,:] .= "missing";
+        if row[1] != '#'; str = split(row,",");
+              info[ii,1:3] .= str[1:3]; vinfo = reshape(str[4:end],6,:);
+              info[ii,4] = vinfo[1,:][1]; info[ii,5] = vinfo[2,:][1];
+              info[ii,6] = vinfo[3,:][1]; info[ii,7] = vinfo[4,:][1];
+              info[ii,8] = vinfo[5,:][1]; info[ii,9] = vinfo[6,:][1];
+        else; info[ii,:] .= missing;
         end
 
     end
 
     ID = (info[:,1] .== productID);
-    productattr["source"]   = info[ID,2][1]; productattr["short"] = info[ID,1][1];
-    productattr["product"]  = info[ID,3][1]; productattr["varID"] = info[ID,5][1];
-    productattr["variable"] = info[ID,6][1]; productattr["units"] = info[ID,7][1];
-    productattr["standard"] = info[ID,5][1]; productattr["scale"] = info[ID,8][1];
-    productattr["offset"]   = info[ID,9][1];
+
+    productattr["short"]   = info[ID,1][1];
+    productattr["source"]  = info[ID,2][1];
+    productattr["product"] = info[ID,3][1];
+
+    productattr["varID"] = info[ID,4]; productattr["standard"] = info[ID,5];
+    productattr["units"] = info[ID,7]; productattr["variable"] = info[ID,6];
+    productattr["scale"] = info[ID,8]; productattr["offset"]   = info[ID,9];
 
     return
 
