@@ -10,7 +10,7 @@ using ClimateEasy
 
 ## Exporting the following functions:
 export
-        clisatroot, clisatrun, clisatread
+        clisatroot, clisatdwn
 
 ## Including other files in the module
 include("startup.jl")
