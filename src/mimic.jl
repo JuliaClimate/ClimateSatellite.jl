@@ -71,13 +71,14 @@ function mimicextract(
     lon,lat = mimiclonlat(); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
     nlon = length(lon); nrlon = length(rlon);
     nlat = length(lat); nrlat = length(rlat);
+    nt = length(fname); rtime = convert(Array,1:nt); tunit = "hours";
 
-    data = zeros(Int16,nrlon,nrlat,length(fname));
+    data = zeros(Int16,nrlon,nrlat,nt);
     rawi = zeros(nlon,nlat); raw = zeros(nlon,nlat); tmp = zeros(nrlon,nrlat);
 
     @info "$(Dates.now()) - Extracted regional $(info["product"]) data for $(rinfo["fullname"])."
 
-    for ii = 1 : length(fname)
+    for ii = 1 : nt
 
         fii = joinpath(fol,fname[ii]);
         if isfile(fii)
@@ -101,7 +102,7 @@ function mimicextract(
     end
 
     @info "$(Dates.now()) - Extracted regional $(info["product"]) data for $(rinfo["fullname"])."
-    return data,[rlon,rlat]
+    return data,[rlon,rlat,rtime,tunit]
 
 end
 

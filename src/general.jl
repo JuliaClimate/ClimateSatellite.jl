@@ -156,11 +156,11 @@ function clisatdwn(
 end
 
 function clisatsave(
-    data::Array{Real,3},
+    data::Array{<:Real,3}, grid::Vector{Any},
     region::AbstractString, info::Dict, date::TimeType
 )
 
-    fnc = clisatncname(info,date,region);
+    fnc = clisatncname(info,date,region); lon,lat,t,tunit = grid;
     nlon = size(data,1); nlat = size(data,2); nt = size(data,3);
     nvar = length(info["variable"])
 
@@ -185,7 +185,7 @@ function clisatsave(
     var_lat = "latitude";  att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
 
     var_t = "time"; att_t = Dict("calendar"=>"gregorian","long_name"=>"time",
-                                 "units"=>"minutes since $(Date.year(date))-$(Date.year(month))-1 0:0:0")
+                                 "units"=>"$(tunit) since $(Date.year(date))-$(Date.year(month))-1 0:0:0")
 
     if isfile(fnc)
         @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting."

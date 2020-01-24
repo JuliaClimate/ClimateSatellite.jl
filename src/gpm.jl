@@ -122,13 +122,14 @@ function gpmextract(
     lon,lat = gpmlonlat(); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
     nlon = length(lon); nrlon = length(rlon);
     nlat = length(lat); nrlat = length(rlat);
+    nt   = length(fH5); rtime = convert(Array,1:nt) * 30; tunit = "minutes";
 
-    data = zeros(Int16,nrlon,nrlat,length(fH5));
+    data = zeros(Int16,nrlon,nrlat,nt);
     rawi = zeros(nlon,nlat,1); raw = zeros(nlon,nlat,1); tmp = zeros(nrlon,nrlat,1);
 
     @info "$(Dates.now()) - Extracting regional $(info["product"]) data for $(rinfo["fullname"]) ..."
 
-    for ii = 1 : length(fH5)
+    for ii = 1 : nt
 
         fH5ii = joinpath(fol,fH5[ii]);
         if isfile(fH5ii)
@@ -149,7 +150,7 @@ function gpmextract(
     end
 
     @info "$(Dates.now()) - Extracted regional $(info["product"]) data for $(rinfo["fullname"])."
-    return data,[rlon,rlat]
+    return data,[rlon,rlat,rtime,tunit]
 
 end
 
@@ -161,7 +162,7 @@ function gpmdwn(
     fH5 = gpmh5list(date,info); #gpmretrieve(fH5,date,tdir,info,overwrite);
 
     for reg in regions
-        data,grid = gpmextract(fH5,tdir,info,reg); #clisatsave(data,grid,reg,info,date)
+        data,grid = gpmextract(fH5,tdir,info,reg); clisatsave(data,grid,reg,info,date)
     end
 
 end
