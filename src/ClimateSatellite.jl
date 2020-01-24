@@ -4,27 +4,20 @@ module ClimateSatellite
 # variables from various satellite instruments
 
 ## Modules Used
-using Dates, Printf
-using NetCDF, HDF5, FTPClient, PyCall
+using Dates, Printf, DelimitedFiles
+using NCDatasets, HDF5, FTPClient, PyCall
 using ClimateEasy
 
 ## Exporting the following functions:
 export
-        clisatroot, pmmftpopen, pmmftpclose,
-        gpmfroot, gpmlroot, gpmeroot, trmmroot, mimicroot,
-        gpmffol, gpmlfol, gpmefol, trmmfol, mimicfol,
-        gpmfncfile, gpmlncfile, gpmencfile, trmmncfile, mimicfile,
-        gpmfrun, gpmlrun, gpmerun, trmmrun, mimicrun
+        clisatroot, clisatdwn
 
 ## Including other files in the module
 include("startup.jl")
-
-include("gpmfinal.jl")
-include("gpmlate.jl")
-include("gpmearly.jl")
-include("trmm.jl")
-
-include("mimic.jl")
+include("general.jl")
+include("gpm.jl")
+#include("trmm.jl")
+#include("mimic.jl")
 #include("modis.jl")
 #include("rss.jl")
 
