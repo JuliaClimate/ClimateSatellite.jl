@@ -17,8 +17,8 @@ function clisatinfo!(productattr::Dict,productID::AbstractString)
         row = fileinfo[ii+1];
         if row[1] != '#'
             str = split(row,","); vinfo = reshape(str[5:end],3,:);
-            info[ii,1:4] .= str[1:4];  info[ii,5] = [vinfo[1,:]];
-            info[ii,6] = [vinfo[2,:]]; info[ii,7] = [vinfo[3,:]];
+            info[ii,1:4] .= str[1:4]; info[ii,5] = vinfo[1,:];
+            info[ii,6] = vinfo[2,:];  info[ii,7] = vinfo[3,:];
         else
             info[ii,:] .= "missing";
         end
@@ -26,9 +26,9 @@ function clisatinfo!(productattr::Dict,productID::AbstractString)
     end
 
     ID = (info[:,1] .== productID);
-    productattr["source"]   = info[ID,2][1]; productattr["short"] = info[ID,4][1];
-    productattr["product"]  = info[ID,3][1]; productattr["varID"] = info[ID,6][1];
-    productattr["variable"] = info[ID,5];    productattr["units"] = info[ID,7];
+    productattr["source"]   = info[ID,2][1]; productattr["short"] = info[ID,1][1];
+    productattr["product"]  = info[ID,3][1]; productattr["varID"] = info[ID,5][1];
+    productattr["variable"] = info[ID,4][1]; productattr["units"] = info[ID,6][1];
 
     return
 
@@ -100,13 +100,30 @@ function clisatsave(
 
     fnc = clisatncname(info,date,region);
     nlon = size(data,1); nlat = size(data,2); nt = size(data,3);
+    nvar = length(info["variable"])
 
     if nlon != length(lon); error("$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements") end
     if nlat != length(lat); error("$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements") end
 
-    var_var = info["variable"]; att_var = Dict("units" => "mm/hr");
-    var_lon = "longitude";      att_lon = Dict("units" => "degree");
-    var_lat = "lattitude";      att_lat = Dict("units" => "degree");
+    var_var = AbstractVector{<:AbstractString}(undef,nvar)
+    att_var = map(x->Dict(),1:nvar)
+
+    for ii = 1 : nvar
+        var_var[ii]                  = info["varID"][ii];
+        att_var[ii]["units"]         = info["units"][ii]
+        att_var[ii]["standard_name"] = info["standard"][ii]
+        att_var[ii]["long_name"]     = info["long"][ii]
+        att_var[ii]["scale_factor"]  = info["scale"][ii]
+        att_var[ii]["add_offset"]    = info["offset"][ii]
+        att_var[ii]["missing_value"] = -32768
+        att_var[ii]["_FillValue"]    = -32768
+    end
+
+    var_lon = "longitude"; att_lon = Dict("units"=>"degrees_east","long_name"="longitude");
+    var_lat = "latitude";  att_lat = Dict("units"=>"degrees_north","long_name"="latitude");
+
+    var_t = "time"; att_t = Dict("calendar"=>gregorian,"long_name"=>"time",
+                                 "units"=>"minutes since $(Date.year(date))-$(Date.year(month))-1 0:0:0")
 
     if isfile(fnc)
         @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting."
@@ -114,14 +131,25 @@ function clisatsave(
     end
 
     @debug "$(Dates.now()) - Creating $(info["source"]) $(info["product"]) $(info["variable"]) netCDF file $(fnc) ..."
-    nccreate(fnc,var_var,"nlon",nlon,"nlat",nlat,"ntime",nt,atts=att_prcp,t=NC_FLOAT);
-    nccreate(fnc,var_lon,"nlon",nlon,atts=att_lon,t=NC_FLOAT);
-    nccreate(fnc,var_lat,"nlat",nlat,atts=att_lat,t=NC_FLOAT);
+
+    for ii = 1 : nvar
+        nccreate(fnc,var_var,"longitude",nlon,"latitude",nlat,"time",nt,
+                 atts=att_var[ii],t=NC_SHORT);
+    end
+
+    nccreate(fnc,var_lon,"longitude",nlon,atts=att_lon,t=NC_FLOAT);
+    nccreate(fnc,var_lat,"latitude",nlat,atts=att_lat,t=NC_FLOAT);
+    nccreate(fnc,var_t,"time",nlat,atts=att_t,t=NC_INT);
 
     @info "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) $(info["variable"]) data to netCDF file $(fnc) ..."
-    ncwrite(data,fnc,var_var);
+
+    for ii = 1 : nvar
+        ncwrite(data,fnc,var_var[ii]);
+    end
+
     ncwrite(lon,fnc,var_lon);
     ncwrite(lat,fnc,var_lat);
+    ncwrite(t,fnc,var_t);
 
     fol = clisatfol(info,date,region);
     @debug "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
