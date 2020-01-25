@@ -16,7 +16,7 @@ end
 function mimicnclist(date::TimeType)
 
     yr = Dates.year(date); mo = Dates.month(date); ndy = daysinmonth(date);
-    fname = Array{<:AbstractString,1}(undef,48*ndy);
+    fname = Array{AbstractString,1}(undef,48*ndy);
 
     @debug "$(Dates.now()) - Creating list of data files to download ..."
     for dy = 1 : ndy; date = Date(yr,mo,ii);
@@ -73,7 +73,7 @@ function mimicextract(
     nlat = length(lat); nrlat = length(rlat);
     nt = length(fname); rtime = convert(Array,1:nt); tunit = "hours";
 
-    data = zeros(Int16,nrlon,nrlat,nt);
+    data = zeros(Int16,nrlon,nrlat,nt); dataii = zeros(Int16,nrlon,nrlat);
     rawi = zeros(nlon,nlat); raw = zeros(nlon,nlat); tmp = zeros(nrlon,nrlat);
 
     @info "$(Dates.now()) - Extracted regional $(info["product"]) data for $(rinfo["fullname"])."
@@ -86,15 +86,17 @@ function mimicextract(
             try
                 ncread!(fii,"tpwGrid",raw);
                 tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
-                real2int16!(data[:,:,ii],tmp,offset=info["offset"],scale=info["scale"]);
+                real2int16!(dataii,tmp,
+                            offset=info["offset"][1],scale=info["scale"][1]);
+                data[:,:,ii] .= dataii;
             catch
-                @warn "$(Dates.now()) - Unable to extract/open $(fii).  Setting MIMIC tropospheric precipitable water data values set to NaN."
+                @warn "$(Dates.now()) - Unable to extract/open $(fii).  Setting MIMIC tropospheric precipitable water data values set to 'missing'."
                 data[:,:,ii] .= -32768;
             end
 
         else
 
-            @info "$(Dates.now()) - $(fii) does not exist.  All values set to NaN."
+            @info "$(Dates.now()) - $(fii) does not exist.  All values set to 'missing'."
             data[:,:,ii] .= -32768;
 
         end
@@ -107,7 +109,7 @@ function mimicextract(
 end
 
 function mimicdwn(
-    regions::Array{AbstractString,1}, date::TimeType, info::Dict; overwrite::Bool
+    regions::Array{<:AbstractString,1}, date::TimeType, info::Dict; overwrite::Bool
 )
 
     tdir = clisattmp(info); if !isdir(tdir) mkpath(tdir); end

@@ -36,7 +36,7 @@ end
 function gpmh5list(date::TimeType, info::Dict)
 
     yr = Dates.year(date); mo = Dates.month(date); ndy = daysinmonth(date);
-    fH5 = Array{<:AbstractString,2}(undef,48,ndy);
+    fH5 = Array{AbstractString,2}(undef,48,ndy);
 
     @debug "$(Dates.now()) - Creating list of data files to download ..."
     for dy = 1 : ndy; dateii = Date(yr,mo,dy);
@@ -124,7 +124,7 @@ function gpmextract(
     nlat = length(lat); nrlat = length(rlat);
     nt   = length(fH5); rtime = convert(Array,1:nt) * 30; tunit = "minutes";
 
-    data = zeros(Int16,nrlon,nrlat,nt);
+    data = zeros(Int16,nrlon,nrlat,nt); dataii = zeros(Int16,nrlon,nrlat)
     rawi = zeros(nlon,nlat,1); raw = zeros(nlon,nlat,1); tmp = zeros(nrlon,nrlat,1);
 
     @info "$(Dates.now()) - Extracting regional $(info["product"]) data for $(rinfo["fullname"]) ..."
@@ -138,11 +138,13 @@ function gpmextract(
             @debug "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
             permutedims!(raw,rawii,[2,1,3]);
             tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
-            real2int16!(data[:,:,ii],tmp,offset=info["offset"],scale=info["scale"]);
+            real2int16!(dataii,tmp,
+                        offset=info["offset"][1],scale=info["scale"][1]);
+            data[:,:,ii] .= dataii;
 
         else
 
-            @info "$(Dates.now()) - $(fH5ii) does not exist.  All values set to NaN."
+            @info "$(Dates.now()) - $(fH5ii) does not exist.  All values set to 'missing'."
             data[:,:,ii] .= -32768;
 
         end
