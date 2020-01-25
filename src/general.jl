@@ -66,7 +66,7 @@ end
 # Extraction of Satellite Product Information
 function clisatinfo!(productattr::Dict,productID::AbstractString)
 
-    fileinfo = readlines(joinpath(@__DIR__,"../data/info.txt"))
+    fileinfo = readlines(joinpath(@__DIR__,"../data/info.csv"))
     info = Array{Any,2}(undef,length(fileinfo)-1,9)
 
     for ii = 1 : length(fileinfo)-1
@@ -77,7 +77,7 @@ function clisatinfo!(productattr::Dict,productID::AbstractString)
               info[ii,4] = vinfo[1,:][1]; info[ii,5] = vinfo[2,:][1];
               info[ii,6] = vinfo[3,:][1]; info[ii,7] = vinfo[4,:][1];
               info[ii,8] = vinfo[5,:][1]; info[ii,9] = vinfo[6,:][1];
-        else; info[ii,:] .= missing;
+        else; info[ii,:] .= "N/A";
         end
 
     end
@@ -90,7 +90,9 @@ function clisatinfo!(productattr::Dict,productID::AbstractString)
 
     productattr["varID"] = info[ID,4]; productattr["standard"] = info[ID,5];
     productattr["units"] = info[ID,7]; productattr["variable"] = info[ID,6];
-    productattr["scale"] = info[ID,8]; productattr["offset"]   = info[ID,9];
+
+    productattr["scale"]  = parse.(Float64,info[ID,8]);
+    productattr["offset"] = parse.(Float64,info[ID,9]);
 
     return
 
@@ -102,7 +104,7 @@ function clisatfol(info::Dict,date::TimeType,region::AbstractString)
 
     if !isdir(fol)
         @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
-        @info "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
 
     return fol
@@ -160,6 +162,8 @@ function clisatsave(
     region::AbstractString, info::Dict, date::TimeType
 )
 
+    @info "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) data for the $(regionfullname(region)) region..."
+
     fnc = clisatncname(info,date,region); lon,lat,t,tunit = grid;
     nlon = size(data,1); nlat = size(data,2); nt = size(data,3);
     nvar = length(info["variable"])
@@ -167,8 +171,8 @@ function clisatsave(
     if nlon != length(lon); error("$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements") end
     if nlat != length(lat); error("$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements") end
 
-    var_var = AbstractVector{<:AbstractString}(undef,nvar)
-    att_var = map(x->Dict(Any,Any),1:nvar)
+    var_var = Vector{AbstractString}(undef,nvar)
+    att_var = map(x->Dict(),1:nvar)
 
     for ii = 1 : nvar
         var_var[ii]                  = info["varID"][ii];
@@ -178,21 +182,21 @@ function clisatsave(
         att_var[ii]["scale_factor"]  = info["scale"][ii];
         att_var[ii]["add_offset"]    = info["offset"][ii];
         att_var[ii]["missing_value"] = -32768;
-        att_var[ii]["_FillValue"]    = -32768;
     end
 
     var_lon = "longitude"; att_lon = Dict("units"=>"degrees_east","long_name"=>"longitude");
     var_lat = "latitude";  att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
 
+    yrstr = @sprintf("%04d",Dates.year(date)); mostr = Dates.month(date);
     var_t = "time"; att_t = Dict("calendar"=>"gregorian","long_name"=>"time",
-                                 "units"=>"$(tunit) since $(Date.year(date))-$(Date.year(month))-1 0:0:0")
+                                 "units"=>"$(tunit) since $(yrstr)-$(mostr)-1 0:0:0")
 
     if isfile(fnc)
         @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting."
         rm(fnc);
     end
 
-    @debug "$(Dates.now()) - Creating $(info["source"]) $(info["product"]) $(info["variable"]) netCDF file $(fnc) ..."
+    @debug "$(Dates.now()) - Creating $(info["source"]) $(info["product"]) netCDF file $(fnc) ..."
 
     for ii = 1 : nvar
         nccreate(fnc,var_var[ii],"longitude",nlon,"latitude",nlat,"time",nt,
@@ -203,11 +207,11 @@ function clisatsave(
     nccreate(fnc,var_lat,"latitude",nlat,atts=att_lat,t=NC_FLOAT);
     nccreate(fnc,var_t,"time",nlat,atts=att_t,t=NC_INT);
 
-    @info "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) $(info["variable"]) data to netCDF file $(fnc) ..."
+    @debug "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) data to netCDF file $(fnc) ..."
 
     if nvar != 1
         for ii = 1 : nvar; ncwrite(data[:,:,:,ii],fnc,var_var[ii]); end
-    else; ncwrite(data,fnc,var_var[ii]);
+    else; ncwrite(data,fnc,var_var[1]);
     end
 
     ncwrite(lon,fnc,var_lon);
@@ -215,10 +219,12 @@ function clisatsave(
     ncwrite(t,fnc,var_t);
 
     fol = clisatfol(info,date,region);
-    @debug "$(Dates.now()) - Moving $(fnc) to data directory $(fol)"
+    @debug "$(Dates.now()) - Moving $(info["source"]) $(info["product"]) data file $(fnc) to data directory $(fol)"
 
-    if isfile(joinpath(fol,fnc)); @info "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
+    if isfile(joinpath(fol,fnc)); @warn "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
 
     mv(fnc,joinpath(fol,fnc),force=true);
+
+    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the $(regionfullname(region)) region has been saved into file $(fnc) and moved to the data directory $(fol)."
 
 end
