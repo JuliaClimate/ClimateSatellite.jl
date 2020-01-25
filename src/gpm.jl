@@ -167,4 +167,6 @@ function gpmdwn(
         data,grid = gpmextract(fH5,tdir,info,reg); clisatsave(data,grid,reg,info,date)
     end
 
+    clisatrmtmp(fH5,tdir);
+
 end

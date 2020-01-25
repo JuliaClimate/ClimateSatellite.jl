@@ -119,4 +119,6 @@ function mimicdwn(
         data,grid = mimicextract(fname,tdir,reg); clisatsave(data,grid,reg,info,date)
     end
 
+    clisatrmtmp(fname,tdir);
+
 end

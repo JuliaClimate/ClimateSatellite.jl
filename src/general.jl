@@ -123,6 +123,14 @@ function clisattmp(info::Dict)
 
 end
 
+function clisatrmtmp(flist::Array{<:AbstractString,2},fol::AbstractString)
+
+    for ii = 1 : length(flist)
+        fii = joinpath(fol,"$(flist[ii])"); if isfile(fii); rm(fii) end
+    end
+
+end
+
 function clisatncname(info::Dict,date::TimeType,region::AbstractString);
     return "$(info["short"])-$(region)-$(ymd2str(date)).nc"
 end
