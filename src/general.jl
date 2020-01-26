@@ -111,6 +111,19 @@ function clisatfol(info::Dict,date::TimeType,region::AbstractString)
 
 end
 
+function clisatfol(info::Dict,region::AbstractString)
+
+    fol = joinpath(info["root"],region);
+
+    if !isdir(fol)
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
+        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+    end
+
+    return fol
+
+end
+
 function clisattmp(info::Dict)
 
     fol = joinpath(info["root"],"tmp");
@@ -132,7 +145,7 @@ function clisatrmtmp(flist::Array{<:AbstractString,2},fol::AbstractString)
 end
 
 function clisatncname(info::Dict,date::TimeType,region::AbstractString);
-    return "$(info["short"])-$(region)-$(ymd2str(date)).nc"
+    return "$(info["short"])-$(region)-$(yrmo2str(date)).nc"
 end
 
 function clisatdwn(
