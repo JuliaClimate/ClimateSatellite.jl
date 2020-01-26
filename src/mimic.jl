@@ -86,8 +86,7 @@ function mimicextract(
             try
                 ncread!(fii,"tpwGrid",raw);
                 tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
-                real2int16!(dataii,tmp,
-                            offset=info["offset"][1],scale=info["scale"][1]);
+                real2int16!(dataii,tmp,offset=60,scale=60/32767);
                 data[:,:,ii] .= dataii;
             catch
                 @warn "$(Dates.now()) - Unable to extract/open $(fii).  Setting MIMIC tropospheric precipitable water data values set to 'missing'."

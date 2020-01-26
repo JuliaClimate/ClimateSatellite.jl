@@ -211,7 +211,7 @@ function clisatextractpoint(
     if dataroot == ""; dataroot = clisatroot(productID); end
 
     info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
-    clisatinfo!(info,productID);
+    clisatinfo!(info,productID); offset = info["offset"]; scale = info["scale"];
 
     if !isdir(clisatfol(info,region))
         error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
@@ -227,7 +227,7 @@ function clisatextractpoint(
     dvecs = Date(yrs,mos); dvecf = Date(yrf,mof);
 
     datevec = convert(Array,dvecs:Dates.month(1):dvecf); ndates = length(datevec);
-    datavec = zeros(ndy*nt);
+    datavec = zeros(Int16,ndy*nt);
 
     for ii = 1 : ndates; dateii = datevec[ii];
 
