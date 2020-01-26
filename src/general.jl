@@ -65,7 +65,7 @@ end
 
 function clisatfol(info::Dict,date::TimeType,region::AbstractString)
 
-    fol = joinpath(info["root"],region,yr2str(date));
+    fol = joinpath(info["root"],region,"raw",yr2str(date));
 
     if !isdir(fol)
         @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
