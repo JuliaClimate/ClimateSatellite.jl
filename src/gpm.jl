@@ -1,6 +1,6 @@
 """
 This file contains all the back-end scripts in ClimateSatellite.jl that are for the download
-and extraction of data from the GPM satellite of the Precipitation Measurement Mission:
+and extraction of data from the GPM product of the Precipitation Measurement Mission:
     * retrieval of file names
     * downloading data from arthurhou and jsimpson servers
     * extraction of chosen regions from global dataset
