@@ -11,7 +11,10 @@ using ClimateEasy
 
 ## Exporting the following functions:
 export
-        clisatroot, clisatdwn
+        clisatinfo!, clisatroot, clisatdwn, clisatsave,
+        clisatextractpoint, clisatextractgrid,
+        clisatroot, clisatfol, clisatncname,
+        gpmdwn, mimicdwn
 
 ## Including other files in the module
 #include("startup.jl")
