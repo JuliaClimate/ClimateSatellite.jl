@@ -112,3 +112,18 @@ end
 function clisatncname(info::Dict,date::TimeType,region::AbstractString);
     return "$(info["short"])-$(region)-$(yrmo2str(date)).nc"
 end
+
+function clisatlonlat(productID::AbstractString)
+
+    if info["source"] == "PMM"
+        if     isprod(info,"gpm");  lon,lat = gpmlonlat()
+        elseif isprod(info,"3b42"); lon,lat = trmmlonlat()
+        end
+    elseif info["source"] == "MIMIC"; lon,lat = mimiclonlat()
+    else
+        error("$(Dates.now()) - The lonlat function for this particular satellite data has not been defined.")
+    end
+
+    return info
+
+end
