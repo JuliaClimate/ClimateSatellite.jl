@@ -11,9 +11,9 @@ using ClimateEasy
 
 ## Exporting the following functions:
 export
-        clisatinfo!, clisatroot, clisatdwn, clisatsave,
-        clisatextractpoint, clisatextractgrid,
-        clisatroot, clisatfol, clisatncname,
+        clisatinfo!, clisatdwn, clisatsave,
+        clisatextractall, clisatextractpoint, clisatextractgrid,
+        clisatroot, clisatfol, clisatncname, clisatlonlat,
         gpmdwn, mimicdwn
 
 ## Including other files in the module

@@ -77,11 +77,15 @@ function clisatsave(
     @info "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) data for the $(regionfullname(region)) region..."
 
     fnc = clisatncname(info,date,region); lon,lat,t,tunit = grid;
-    nlon = size(data,1); nlat = size(data,2); nt = size(data,3);
-    nvar = length(info["variable"])
+    nlon,nlat,nt = size(data); nvar = length(info["variable"]);
+    yrstr = @sprintf("%04d",Dates.year(date)); mostr = Dates.month(date);
 
-    if nlon != length(lon); error("$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements") end
-    if nlat != length(lat); error("$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements") end
+    if nlon != length(lon)
+        error("$(Dates.now()) - nlon is $(nlon) but lon contains $(length(lon)) elements")
+    end
+    if nlat != length(lat)
+        error("$(Dates.now()) - nlat is $(nlat) but lat contains $(length(lat)) elements")
+    end
 
     var_var = Vector{AbstractString}(undef,nvar)
     att_var = map(x->Dict(),1:nvar)
@@ -96,39 +100,41 @@ function clisatsave(
         att_var[ii]["missing_value"] = -32768;
     end
 
-    var_lon = "longitude"; att_lon = Dict("units"=>"degrees_east","long_name"=>"longitude");
-    var_lat = "latitude";  att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
-
-    yrstr = @sprintf("%04d",Dates.year(date)); mostr = Dates.month(date);
-    var_t = "time"; att_t = Dict("calendar"=>"gregorian","long_name"=>"time",
-                                 "units"=>"$(tunit) since $(yrstr)-$(mostr)-1 0:0:0")
+    att_lon = Dict("units"=>"degrees_east","long_name"=>"longitude");
+    att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
+    att_t   = Dict("calendar"=>"gregorian","long_name"=>"time",
+                   "units"=>"$(tunit) since $(yrstr)-$(mostr)-1 0:0:0");
 
     if isfile(fnc)
         @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting."
         rm(fnc);
     end
 
+    ## Write data here
+
     @debug "$(Dates.now()) - Creating $(info["source"]) $(info["product"]) netCDF file $(fnc) ..."
 
-    for ii = 1 : nvar
-        nccreate(fnc,var_var[ii],"longitude",nlon,"latitude",nlat,"time",nt,
-                 atts=att_var[ii],t=NC_SHORT);
-    end
-
-    nccreate(fnc,var_lon,"longitude",nlon,atts=att_lon,t=NC_FLOAT);
-    nccreate(fnc,var_lat,"latitude",nlat,atts=att_lat,t=NC_FLOAT);
-    nccreate(fnc,var_t,"time",nlat,atts=att_t,t=NC_INT);
+    ds = Dataset(fnc,"c");
+    ds.dim["longitude"] = nlon; ds.dim["latitude"] = nlat; ds.dim["time"] = nt;
 
     @debug "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) data to netCDF file $(fnc) ..."
 
     if nvar != 1
-        for ii = 1 : nvar; ncwrite(data[:,:,:,ii],fnc,var_var[ii]); end
-    else; ncwrite(data,fnc,var_var[1]);
+        for ii = 1 : nvar
+            defVar(ds,var_var[ii],data[:,:,:,ii],("longitude","latitude","time"),
+                   atts=att_var[ii]);
+        end
+    else;
+        defVar(ds,var_var[1],data,("longitude","latitude","time"),atts=att_var[1]);
     end
 
-    ncwrite(lon,fnc,var_lon);
-    ncwrite(lat,fnc,var_lat);
-    ncwrite(t,fnc,var_t);
+    defVar(ds,"longitude",lon,("longitude",),attrib=att_lon)
+    defVar(ds,"latitude",lat,("latitude",),attrib=att_lat)
+    defVar(ds,"time",t,("time",),attrib=att_t)
+
+    close(ds);
+
+    ## Write data end
 
     fol = clisatfol(info,date,region);
     @debug "$(Dates.now()) - Moving $(info["source"]) $(info["product"]) data file $(fnc) to data directory $(fol)"
@@ -142,7 +148,7 @@ function clisatsave(
 end
 
 # Root Functions
-function clisatextractgrid(
+function clisatextractall(
     productID::AbstractString, varname::AbstractString,
     start::TimeType, finish::TimeType;
     dataroot::AbstractString="",
@@ -167,11 +173,11 @@ function clisatextractgrid(
     ndy = Dates.value((finish-start)/Dates.day(1)); nt = info["dayfreq"];
     dvecs = Date(yrs,mos); dvecf = Date(yrf,mof);
 
-    N,S,E,W = regionbounds(reg); res = info["gridres"];
-    nlon = length(S:res:N); nlat = length(W:res:E);
+    lon,lat = clisatlonlat(productID); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
+    nlon = length(rlon); nlat = length(rlat);
 
     datevec = convert(Array,dvecs:Dates.month(1):dvecf); ndates = length(datevec);
-    datavec = zeros(nlon,nlat,ndy*nt);
+    datavec = zeros(Int16,nlon,nlat,ndy*nt);
 
     for ii = 1 : ndates; dateii = datevec[ii];
 
@@ -181,34 +187,40 @@ function clisatextractgrid(
         end
 
         fnc = joinpath(fol,clisatncname(info,dateii,region));
+        ds  = Dataset(fnc,"r"); vds = ds[varname];
 
         if     ii == 1 && ii != ndates
             moday = daysinmonth(dateii); ibeg = (dys-1)*nt + 1; iend = (moday+1-dys)*nt;
-            datavec[:,:,1:iend] .= ncread(fnc,varname,start=[1,1,ibeg],count=[-1,-1,-1]);
+            datavec[:,:,1:iend] .= vds.var[:,:,ibeg:end];
         elseif ii != 1 && ii == ndates
             ibeg = iend+1; iend = dyf*nt;
-            datavec[:,:,ibeg:end] .= ncread(fnc,varname,start=[1,1,1],count=[-1,-1,iend]);
+            datavec[:,:,ibeg:end] .= vds.var[:,:,1:iend];
         elseif ii == 1 && ii == ndates
             ibeg = (dys-1)*nt + 1; iend = dyf*nt;
-            ncread!(fnc,varname,datavec,start=[1,1,ibeg],count=[-1,-1,iend])
+            load!(vds.var,datavec,:,:,ibeg:iend)
         else
             moday = daysinmonth(dateii); ibeg = iend+1; iend = ibeg-1 + moday*nt;
-            datavec[:,:,ibeg:iend] .= ncread(fnc,varname);
+            datavec[:,:,ibeg:iend] .= vds.var[:];
         end
 
     end
+
+    return datavec,v.attrib
 
 end
 
 function clisatextractpoint(
     productID::AbstractString, varname::AbstractString,
     start::TimeType, finish::TimeType;
-    coord::Array{<:Real,1}=[],
+    coord::Array{<:Real,1},
     dataroot::AbstractString="",
     region::AbstractString="GLB"
 )
 
     if dataroot == ""; dataroot = clisatroot(productID); end
+    if length(coord) != 2
+        error("$(Dates.now()) - Coordinate vector must be in the form [lon,lat]")
+    end
 
     info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
     clisatinfo!(info,productID); offset = info["offset"]; scale = info["scale"];
@@ -226,6 +238,9 @@ function clisatextractpoint(
     ndy = Dates.value((finish-start)/Dates.day(1)); nt = info["dayfreq"];
     dvecs = Date(yrs,mos); dvecf = Date(yrf,mof);
 
+    lon,lat = clisatlonlat(productID); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
+    plon,plat = coord; ilon,ilat = regionpoint(plon,plat,rlon,rlat);
+
     datevec = convert(Array,dvecs:Dates.month(1):dvecf); ndates = length(datevec);
     datavec = zeros(Int16,ndy*nt);
 
@@ -237,21 +252,91 @@ function clisatextractpoint(
         end
 
         fnc = joinpath(fol,clisatncname(info,dateii,region));
+        ds  = Dataset(fnc,"r"); vds = ds[varname];
 
         if     ii == 1 && ii != ndates
             moday = daysinmonth(dateii); ibeg = (dys-1)*nt + 1; iend = (moday+1-dys)*nt;
-            datavec[1:iend] .= ncread(fnc,varname,start=[1,1,ibeg],count=[-1,-1,-1]);
+            datavec[1:iend] .= vds.var[ilon,ilat,ibeg:end];
         elseif ii != 1 && ii == ndates
             ibeg = iend+1; iend = dyf*nt;
-            datavec[ibeg:end] .= ncread(fnc,varname,start=[1,1,1],count=[-1,-1,iend]);
+            datavec[ibeg:end] .= vds.var[ilon,ilat,1:iend];
         elseif ii == 1 && ii == ndates
             ibeg = (dys-1)*nt + 1; iend = dyf*nt;
-            ncread!(fnc,varname,datavec,start=[1,1,ibeg],count=[-1,-1,iend])
+            load!(vds.var,datavec,ilon,ilat,ibeg:iend)
         else
             moday = daysinmonth(dateii); ibeg = iend+1; iend = ibeg-1 + moday*nt;
-            datavec[ibeg:iend] .= ncread(fnc,varname);
+            datavec[ibeg:iend] .= vds.var[ilon,ilat,:];
         end
 
     end
+
+    return datavec,v.attrib
+
+end
+
+function clisatextractgrid(
+    productID::AbstractString, varname::AbstractString,
+    start::TimeType, finish::TimeType;
+    grid::Array{<:Real,1},
+    dataroot::AbstractString="",
+    region::AbstractString="GLB"
+)
+
+    if dataroot == ""; dataroot = clisatroot(productID); end
+    if length(coord) != 4
+        error("$(Dates.now()) - Grid vector must be in the form [N,S,E,W]")
+    end
+
+    info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
+    clisatinfo!(info,productID); offset = info["offset"]; scale = info["scale"];
+
+    if !isdir(clisatfol(info,region))
+        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
+    end
+
+    if sum(info["varID"] .== varname) == 0
+        error("$(Dates.now()) - There is no varname identifier $(varname) for $(info["source"]) $(info["product"])")
+    end
+
+    yrs = Dates.year(start);  mos = Dates.month(start);  dys = Dates.month(start);
+    yrf = Dates.year(finish); mof = Dates.month(finish); dyf = Dates.month(finish);
+    ndy = Dates.value((finish-start)/Dates.day(1)); nt = info["dayfreq"];
+    dvecs = Date(yrs,mos); dvecf = Date(yrf,mof);
+
+    lon,lat = clisatlonlat(productID); isgridinregion(grid,region);
+    rlon,rlat,rinfo = regiongridvec(region,lon,lat);
+    glon,glat,ginfo = regiongridvec(bounds,rlon,rlat); iWE,iNS = ginfo["IDvec"];
+    nlon = length(glon); nlat = length(glat);
+
+    datevec = convert(Array,dvecs:Dates.month(1):dvecf); ndates = length(datevec);
+    datavec = zeros(Int16,nlon,nlat,ndy*nt);
+
+    for ii = 1 : ndates; dateii = datevec[ii];
+
+        fol = clisatfol(info,dateii,region);
+        if !isdir(fol)
+            error(("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
+        end
+
+        fnc = joinpath(fol,clisatncname(info,dateii,region));
+        ds  = Dataset(fnc,"r"); vds = ds[varname];
+
+        if     ii == 1 && ii != ndates
+            moday = daysinmonth(dateii); ibeg = (dys-1)*nt + 1; iend = (moday+1-dys)*nt;
+            datavec[:,:,1:iend] .= vds.var[iWE,iNS,ibeg:end];
+        elseif ii != 1 && ii == ndates
+            ibeg = iend+1; iend = dyf*nt;
+            datavec[:,:,ibeg:end] .= vds.var[iWE,iNS,1:iend];
+        elseif ii == 1 && ii == ndates
+            ibeg = (dys-1)*nt + 1; iend = dyf*nt;
+            load!(vds.var,datavec,iWE,iNS,ibeg:iend)
+        else
+            moday = daysinmonth(dateii); ibeg = iend+1; iend = ibeg-1 + moday*nt;
+            datavec[:,:,ibeg:iend] .= vds.var[iWE,iNS,:];
+        end
+
+    end
+
+    return datavec,v.attrib
 
 end
