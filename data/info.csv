@@ -1,18 +1,18 @@
 #(1)Product ID,(2)Source,(3)Product,(4)GridStep,(5)PerDay,(6)Variable ID,(7)Standard Name,(8)Long Name,(9)Units,(10)Offset,(11)Scale Factor
-gpmimerg,PMM,GPM IMERG,0.1,48,prcp_rate,lwe_precipitation_rate,Precipitation Rate,kg m^-2 s-1,4.55097222222222E-02,1.38888888888889E-06
-gpmlate,PMM,GPM NRT-(Late),0.1,48,prcp_rate,lwe_precipitation_rate,Precipitation Rate,kg m^-2 s-1,4.55097220000000E-02,1.38889000000000E-06
-gpmearly,PMM,GPM NRT-(Early),0.1,48,prcp_rate,lwe_precipitation_rate,Precipitation Rate,kg m^-2 s-1,4.55097220000000E-02,1.38889000000000E-06
-trmm3b42,PMM,TRMM 3B42,0.25,8,prcp_rate,lwe_precipitation_rate,Precipitation Rate,kg m^-2 s-1,4.55097220000000E-02,1.38889000000000E-06
-mtpw2m,MIMIC,TPW2m,0.25,24,tpw,lwe_thickness_of_atmosphere_mass_content_of_water_vapor,Total Precipitable Water,kg m^-2,6.00000000000000E+01,1.83111100000000E-03
-#rsstmi,RSS,TRMM Microwave Imager,0.25,1,sst,,,K,,
-#rsstmi,RSS,TRMM Microwave Imager,0.25,1,uvw_sfc_LF,,,m s-1,,
-#rsstmi,RSS,TRMM Microwave Imager,0.25,1,uvw_sfc_MF,,,m s-1,,
-#rsstmi,RSS,TRMM Microwave Imager,0.25,1,tpw,lwe_thickness_of_atmosphere_mass_content_of_water_vapor,Total Precipitable Water,m,,
-#rsstmi,RSS,TRMM Microwave Imager,0.25,1,cld_sfc,,Cloud Liquid Water,m,,
-#rsstmi,RSS,TRMM Microwave Imager,0.25,1,prcp_rate,lwe_precipitation_rate,Precipitation Rate,m s-1,,
-#rssgmi,RSS,GPM Microwave Imager,0.25,1,sst,,,K,,
-#rssgmi,RSS,GPM Microwave Imager,0.25,1,uvw_sfc_LF,,,m s-1,,
-#rssgmi,RSS,GPM Microwave Imager,0.25,1,uvw_sfc_MF,,,m s-1,,
-#rssgmi,RSS,GPM Microwave Imager,0.25,1,tpw,lwe_thickness_of_atmosphere_mass_content_of_water_vapor,Total Precipitable Water,m,,
-#rssgmi,RSS,GPM Microwave Imager,0.25,1,cld_sfc,,Cloud Liquid Water,m,,
-#rssgmi,RSS,GPM Microwave Imager,0.25,1,prcp_rate,lwe_precipitation_rate,Precipitation Rate,m s-1,,
+gpmimerg,PMM,GPM IMERG,0.1,48,prcp_rate,precipitation_amount,Precipitation Rate,kg m^-2 s-1,4.55097222222222E-02,1.38888888888889E-06
+gpmlate,PMM,GPM NRT-(Late),0.1,48,prcp_rate,precipitation_amount,Precipitation Rate,kg m^-2 s-1,4.55097220000000E-02,1.38888888888889E-06
+gpmearly,PMM,GPM NRT-(Early),0.1,48,prcp_rate,precipitation_amount,Precipitation Rate,kg m^-2 s-1,4.55097220000000E-02,1.38888888888889E-06
+trmm3b42,PMM,TRMM 3B42,0.25,8,prcp_rate,precipitation_amount,Precipitation Rate,kg m^-2 s-1,4.55097220000000E-02,1.38888888888889E-06
+mtpw2m,MIMIC,TPW2m,0.25,24,tpw,atmosphere_mass_content_of_water,Total Precipitable Water,kg m^-2,6.00000000000000E+01,1.83111056855983E-03
+rsstmi,RSS,TRMM Microwave Imager,0.25,1,sst,sea_surface_temperature,,K,-2.76150000000000E+02,1.50000000000000E-01
+rsstmi,RSS,TRMM Microwave Imager,0.25,1,uvw_sfc_LF,wind_speed,Surface Wind Speed,m s-1,0.00000000000000E+00,2.00000000000000E-01
+rsstmi,RSS,TRMM Microwave Imager,0.25,1,uvw_sfc_MF,wind_speed,Surface Wind Speed,m s-1,0.00000000000000E+00,2.00000000000000E-01
+rsstmi,RSS,TRMM Microwave Imager,0.25,1,tpw,atmosphere_mass_content_of_water_vapor,Total Precipitable Water,kg m^-2,0.00000000000000E+00,3.00000000000000E-01
+rsstmi,RSS,TRMM Microwave Imager,0.25,1,cld_sfc,atmosphere_mass_content_of_cloud_liquid_water,Cloud Liquid Water,kg m^-2,-5.00000000000000E-02,1.00000000000000E-02
+rsstmi,RSS,TRMM Microwave Imager,0.25,1,prcp_rate,precipitation_amount,Precipitation Rate,kg m^-2 s-1,0.00000000000000E+00,2.77777777777778E-05
+rssgmi,RSS,GPM Microwave Imager,0.25,1,sst,sea_surface_temperature,,K,-2.76150000000000E+02,1.50000000000000E-01
+rssgmi,RSS,GPM Microwave Imager,0.25,1,uvw_sfc_LF,wind_speed,Surface Wind Speed,m s-1,0.00000000000000E+00,2.00000000000000E-01
+rssgmi,RSS,GPM Microwave Imager,0.25,1,uvw_sfc_MF,wind_speed,Surface Wind Speed,m s-1,0.00000000000000E+00,2.00000000000000E-01
+rssgmi,RSS,GPM Microwave Imager,0.25,1,tpw,atmosphere_mass_content_of_water_vapor,Total Precipitable Water,kg m^-2,0.00000000000000E+00,3.00000000000000E-01
+rssgmi,RSS,GPM Microwave Imager,0.25,1,cld_sfc,atmosphere_mass_content_of_cloud_liquid_water,Cloud Liquid Water,kg m^-2,-5.00000000000000E-02,1.00000000000000E-02
+rssgmi,RSS,GPM Microwave Imager,0.25,1,prcp_rate,precipitation_amount,Precipitation Rate,kg m^-2 s-1,0.00000000000000E+00,2.77777777777778E-05
