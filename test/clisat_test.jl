@@ -3,7 +3,7 @@ using ClimateSatellite
 global_logger(ConsoleLogger(stderr,Logging.Info))
 
 user = "natgeo.wong@outlook.com"
-clisatdwn(Date(2007,1),productID="gpmimerg",email=user,regions=["SGP"])
+clisatdwn("gpmimerg",Date(2007,1),email=user,regions=["SGP"])
 data,info,grid = clisatextractall("gpmimerg","prcp_rate",
                              Date(2007,1,3),Date(2007,1,14),
                              region="SGP");
