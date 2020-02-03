@@ -3,4 +3,13 @@ using ClimateSatellite
 global_logger(ConsoleLogger(stderr,Logging.Info))
 
 user = "natgeo.wong@outlook.com"
-info = clisatdwn(Date(2007,1),productID="pmm_imerg",email=user,regions=["SEA"])
+clisatdwn(Date(2007,1),productID="gpmimerg",email=user,regions=["SGP"])
+data,info,grid = clisatextractall("gpmimerg","prcp_rate",
+                             Date(2007,1,3),Date(2007,1,14),
+                             region="SGP");
+data,info = clisatextractpoint("gpmimerg","prcp_rate",
+                               Date(2007,1,3),Date(2007,1,14),
+                               coord=[103.4,2.2],region="SGP");
+data,info,grid = clisatextractgrid("gpmimerg","prcp_rate",
+                                   Date(2007,1,3),Date(2007,1,14),
+                                   grid=[2.5,1.9,105,103.4],region="SGP");
