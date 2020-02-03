@@ -12,12 +12,14 @@ using ClimateEasy
 export
         clisatinfo!, clisatdwn, clisatsave,
         clisatextractall, clisatextractpoint, clisatextractgrid,
-        clisatroot, clisatfol, clisatncname, clisatlonlat,
+        clisatroot, clisatrawfol, clisatanafol, clisatncname,
+        clisatlonlat,
         gpmdwn, mimicdwn
 
 ## Including other files in the module
 include("general.jl")
 include("frontend.jl")
+include("analysis.jl")
 include("gpm.jl")
 #include("trmm.jl")
 include("mimic.jl")
