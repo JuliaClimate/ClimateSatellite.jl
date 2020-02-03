@@ -75,7 +75,7 @@ end
 
 function gpmget(ftp,file::AbstractString,tdir::AbstractString,overwrite::Bool)
 
-    if overwrite && !isfile(joinpath(tdir,file))
+    if overwrite || !isfile(joinpath(tdir,file))
         try download(ftp,file,joinpath(tdir,file));
             @debug "$(Dates.now()) - Downloaded data file $(file)"
         catch; @warn "$(Dates.now()) - Data file $(file) does not exist."
@@ -85,7 +85,7 @@ function gpmget(ftp,file::AbstractString,tdir::AbstractString,overwrite::Bool)
 end
 
 function gpmretrieve(
-    fH5::Array{String,2},
+    fH5::Array{<:AbstractString,2},
     date::TimeType,
     tdir::AbstractString, info::Dict,
     overwrite::Bool
@@ -160,7 +160,7 @@ function gpmdwn(
 )
 
     tdir = clisattmp(info); if !isdir(tdir) mkpath(tdir); end; gpmh5!(info)
-    fH5 = gpmh5list(date,info); #gpmretrieve(fH5,date,tdir,info,overwrite);
+    fH5 = gpmh5list(date,info); gpmretrieve(fH5,date,tdir,info,overwrite);
 
     for reg in regions
         data,grid = gpmextract(fH5,tdir,info,reg); clisatsave(data,grid,reg,info,date)

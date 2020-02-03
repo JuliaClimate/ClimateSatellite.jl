@@ -39,7 +39,7 @@ function mimicget(
     tdir::AbstractString,
     overwrite::Bool
 )
-    if overwrite && !isfile(joinpath(tdir,file))
+    if overwrite || !isfile(joinpath(tdir,file))
         try download("$(url)/$(file)",joinpath(tdir,file));
             @debug "$(Dates.now()) - Downloaded MIMIC tropospheric precipitable water data file $(file)"
         catch;
