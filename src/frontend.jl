@@ -1,5 +1,15 @@
 """
-This file stores all the WIP general functions for ClimateSatellite.jl
+This file stores the major front-end functions of ClimateSatellite.jl that are important for
+data downloading and extraction.  Analysis scripts are found in the analysis.jl file.
+
+Current functionalities stored in this file include:
+- Extraction of satellite information
+- Downloading of satellite data (general-purpose function that calls the specific backend)
+- Saving of satellite data into NetCDF files
+- Extraction of downloaded satellite data for the following
+    - Domain-name specific (previously defined in ClimateEasy)
+    - Point location (nearest-neighbour)
+    - Within a given boundary found in a specific domain
 
 """
 
@@ -40,9 +50,9 @@ function clisatinfo!(productattr::Dict,productID::AbstractString)
 end
 
 function clisatdwn(
-    date::TimeType;
-    productID::AbstractString, email::AbstractString,
-    path::AbstractString="", regions::Array{<:AbstractString,1}=["GLB"],
+    productID::AbstractString, date::TimeType;
+    email::AbstractString, path::AbstractString="",
+    regions::Array{<:AbstractString,1}=["GLB"],
     overwrite::Bool=false
 )
 
@@ -136,7 +146,7 @@ function clisatsave(
 
     ## Write data end
 
-    fol = clisatfol(info,date,region);
+    fol = clisatrawfol(info,date,region);
     @debug "$(Dates.now()) - Moving $(info["source"]) $(info["product"]) data file $(fnc) to data directory $(fol)"
 
     if isfile(joinpath(fol,fnc)); @warn "$(Dates.now()) - An older version of $(fnc) exists in the $(fol) directory.  Overwriting." end
@@ -164,7 +174,7 @@ function clisatextractall(
 
     @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the entire $(regionfullname(region)) region ..."
 
-    if !isdir(clisatfol(info,region))
+    if !isdir(clisatregfol(info,region))
         error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
     end
 
@@ -192,7 +202,7 @@ function clisatextractall(
 
     for ii = 1 : ndates; dateii = datevec[ii];
 
-        fol = clisatfol(info,dateii,region);
+        fol = clisatrawfol(info,dateii,region);
         if !isdir(fol)
             error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
         end
@@ -246,7 +256,7 @@ function clisatextractpoint(
 
     @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data at coordinates $(coord) ..."
 
-    if !isdir(clisatfol(info,region))
+    if !isdir(clisatregfol(info,region))
         error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
     end
 
@@ -274,7 +284,7 @@ function clisatextractpoint(
 
     for ii = 1 : ndates; dateii = datevec[ii];
 
-        fol = clisatfol(info,dateii,region);
+        fol = clisatrawfol(info,dateii,region);
         if !isdir(fol)
             error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
         end
@@ -328,7 +338,7 @@ function clisatextractgrid(
 
     @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the [N,S,E,W] bounds $(grid) ..."
 
-    if !isdir(clisatfol(info,region))
+    if !isdir(clisatregfol(info,region))
         error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
     end
 
@@ -358,7 +368,7 @@ function clisatextractgrid(
 
     for ii = 1 : ndates; dateii = datevec[ii];
 
-        fol = clisatfol(info,dateii,region);
+        fol = clisatrawfol(info,dateii,region);
         if !isdir(fol)
             error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
         end
