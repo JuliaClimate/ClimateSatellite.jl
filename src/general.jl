@@ -63,6 +63,48 @@ function isprod(info::Dict,product::AbstractString)
     occursin(product,info["short"])
 end
 
+## Functions to define Containing Folder for a particular Satellite Data Source
+
+function clisatfol(
+    productID::AbstractString,date::TimeType,region::AbstractString;
+    path::AbstractString=""
+)
+
+    if path == ""; dataroot = clisatroot(productID);
+    else;          dataroot = clisatroot(productID,path);
+    end
+
+    fol = joinpath(dataroot,region,"raw",yr2str(date));
+
+    if !isdir(fol)
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
+        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+    end
+
+    return fol
+
+end
+
+function clisatfol(
+    productID::AbstractString,region::AbstractString;
+    path::AbstractString=""
+)
+
+    if path == ""; dataroot = clisatroot(productID);
+    else;          dataroot = clisatroot(productID,path);
+    end
+
+    fol = joinpath(info["root"],region);
+
+    if !isdir(fol)
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
+        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+    end
+
+    return fol
+
+end
+
 function clisatfol(info::Dict,date::TimeType,region::AbstractString)
 
     fol = joinpath(info["root"],region,"raw",yr2str(date));
@@ -109,11 +151,15 @@ function clisatrmtmp(flist::Array{<:AbstractString,2},fol::AbstractString)
 
 end
 
+function clisatncname(productID::AbstractString,date::TimeType,region::AbstractString);
+    return "$(productID)-$(region)-$(yrmo2str(date)).nc"
+end
+
 function clisatncname(info::Dict,date::TimeType,region::AbstractString);
     return "$(info["short"])-$(region)-$(yrmo2str(date)).nc"
 end
 
-function clisatlonlat(productID::AbstractString)
+function clisatlonlat(info::Dict)
 
     if info["source"] == "PMM"
         if     isprod(info,"gpm");  lon,lat = gpmlonlat()
@@ -124,6 +170,6 @@ function clisatlonlat(productID::AbstractString)
         error("$(Dates.now()) - The lonlat function for this particular satellite data has not been defined.")
     end
 
-    return info
+    return lon,lat
 
 end
