@@ -6,7 +6,7 @@ This file stores all the WIP general functions for ClimateSatellite.jl
 function clisatinfo!(productattr::Dict,productID::AbstractString)
 
     fileinfo = readlines(joinpath(@__DIR__,"../data/info.csv"))
-    info = Array{Any,2}(undef,length(fileinfo)-1,10)
+    info = Array{Any,2}(undef,length(fileinfo)-1,11)
 
     for ii = 1 : length(fileinfo)-1
 
@@ -26,14 +26,14 @@ function clisatinfo!(productattr::Dict,productID::AbstractString)
     productattr["short"]   = info[ID,1][1];
     productattr["source"]  = info[ID,2][1];
     productattr["product"] = info[ID,3][1];
-    productattr["gridres"] = parse.(Int8,info[ID,4][1]);
+    productattr["gridres"] = parse.(Float64,info[ID,4][1]);
     productattr["dayfreq"] = parse.(Int8,info[ID,5][1]);
 
     productattr["varID"] = info[ID,6]; productattr["standard"] = info[ID,7];
     productattr["units"] = info[ID,9]; productattr["variable"] = info[ID,8];
 
-    productattr["scale"]  = parse.(Float64,info[ID,10]);
-    productattr["offset"] = parse.(Float64,info[ID,11]);
+    productattr["offset"] = parse.(Float64,info[ID,10]);
+    productattr["scale"]  = parse.(Float64,info[ID,11]);
 
     return
 
@@ -42,11 +42,13 @@ end
 function clisatdwn(
     date::TimeType;
     productID::AbstractString, email::AbstractString,
-    dataroot::AbstractString="", regions::Array{<:AbstractString,1}=["GLB"],
+    path::AbstractString="", regions::Array{<:AbstractString,1}=["GLB"],
     overwrite::Bool=false
 )
 
-    if dataroot == ""; dataroot = clisatroot(productID); end
+    if path == ""; dataroot = clisatroot(productID);
+    else;          dataroot = clisatroot(productID,path);
+    end
 
     info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
     clisatinfo!(info,productID);
@@ -64,8 +66,6 @@ function clisatdwn(
         elseif isprod(info,"amsr"); rmsrdwn(regions,date,info,email,overwrite=overwrite);
         end
     end
-
-    return info
 
 end
 
@@ -151,14 +151,18 @@ end
 function clisatextractall(
     productID::AbstractString, varname::AbstractString,
     start::TimeType, finish::TimeType;
-    dataroot::AbstractString="",
-    region::AbstractString="GLB"
+    path::AbstractString="",
+    region::AbstractString="GLB",
+    unpack::Bool=true
 )
 
-    if dataroot == ""; dataroot = clisatroot(productID); end
+    if path == ""; dataroot = clisatroot(productID);
+    else;          dataroot = clisatroot(productID,path);
+    end
 
-    info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
-    clisatinfo!(info,productID);
+    info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
+
+    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the entire $(regionfullname(region)) region ..."
 
     if !isdir(clisatfol(info,region))
         error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
@@ -166,24 +170,31 @@ function clisatextractall(
 
     if sum(info["varID"] .== varname) == 0
         error("$(Dates.now()) - There is no varname identifier $(varname) for $(info["source"]) $(info["product"])")
+    else; vID = info["varID"] .== varname;
+        info["varID"] = info["varID"][vID][1];
+        info["units"] = info["units"][vID][1];
+        info["variable"] = info["variable"][vID][1];
+        info["standard"] = info["standard"][vID][1];
+        info["scale"] = info["scale"][vID][1];
+        info["offset"] = info["offset"][vID][1];
     end
 
-    yrs = Dates.year(start);  mos = Dates.month(start);  dys = Dates.month(start);
-    yrf = Dates.year(finish); mof = Dates.month(finish); dyf = Dates.month(finish);
+    yrs = Dates.year(start);  mos = Dates.month(start);  dys = Dates.day(start);
+    yrf = Dates.year(finish); mof = Dates.month(finish); dyf = Dates.day(finish);
     ndy = Dates.value((finish-start)/Dates.day(1)); nt = info["dayfreq"];
     dvecs = Date(yrs,mos); dvecf = Date(yrf,mof);
 
-    lon,lat = clisatlonlat(productID); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
+    lon,lat = clisatlonlat(info); rlon,rlat,rinfo = regiongridvec(region,lon,lat);
     nlon = length(rlon); nlat = length(rlat);
 
-    datevec = convert(Array,dvecs:Dates.month(1):dvecf); ndates = length(datevec);
+    datevec = convert(Array,dvecs:Month(1):dvecf); ndates = length(datevec);
     datavec = zeros(Int16,nlon,nlat,ndy*nt);
 
     for ii = 1 : ndates; dateii = datevec[ii];
 
         fol = clisatfol(info,dateii,region);
         if !isdir(fol)
-            error(("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
+            error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
         end
 
         fnc = joinpath(fol,clisatncname(info,dateii,region));
@@ -191,21 +202,26 @@ function clisatextractall(
 
         if     ii == 1 && ii != ndates
             moday = daysinmonth(dateii); ibeg = (dys-1)*nt + 1; iend = (moday+1-dys)*nt;
-            datavec[:,:,1:iend] .= vds.var[:,:,ibeg:end];
+            datavec[:,:,1:iend] = vds.var[:,:,ibeg:end];
         elseif ii != 1 && ii == ndates
             ibeg = iend+1; iend = dyf*nt;
-            datavec[:,:,ibeg:end] .= vds.var[:,:,1:iend];
+            datavec[:,:,ibeg:end] = vds.var[:,:,1:iend];
         elseif ii == 1 && ii == ndates
             ibeg = (dys-1)*nt + 1; iend = dyf*nt;
-            load!(vds.var,datavec,:,:,ibeg:iend)
+            datavec = vds.var[:,:,ibeg:iend];
         else
             moday = daysinmonth(dateii); ibeg = iend+1; iend = ibeg-1 + moday*nt;
-            datavec[:,:,ibeg:iend] .= vds.var[:];
+            datavec[:,:,ibeg:iend] = vds.var[:];
         end
 
     end
 
-    return datavec,v.attrib
+    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the entire $(regionfullname(region)) region has been extracted."
+
+    if !unpack; return datavec,info,[rlon,rlat]
+    else; offset = info["offset"]; scale = info["scale"];
+          return datavec.*scale.+offset,info,[rlon,rlat]
+    end
 
 end
 
@@ -213,17 +229,22 @@ function clisatextractpoint(
     productID::AbstractString, varname::AbstractString,
     start::TimeType, finish::TimeType;
     coord::Array{<:Real,1},
-    dataroot::AbstractString="",
-    region::AbstractString="GLB"
+    path::AbstractString="",
+    region::AbstractString="GLB",
+    unpack::Bool=true
 )
 
-    if dataroot == ""; dataroot = clisatroot(productID); end
+    if path == ""; dataroot = clisatroot(productID);
+    else;          dataroot = clisatroot(productID,path);
+    end
+
     if length(coord) != 2
         error("$(Dates.now()) - Coordinate vector must be in the form [lon,lat]")
     end
 
-    info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
-    clisatinfo!(info,productID); offset = info["offset"]; scale = info["scale"];
+    info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
+
+    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data at coordinates $(coord) ..."
 
     if !isdir(clisatfol(info,region))
         error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
@@ -231,24 +252,31 @@ function clisatextractpoint(
 
     if sum(info["varID"] .== varname) == 0
         error("$(Dates.now()) - There is no varname identifier $(varname) for $(info["source"]) $(info["product"])")
+    else; vID = info["varID"] .== varname;
+        info["varID"] = info["varID"][vID][1];
+        info["units"] = info["units"][vID][1];
+        info["variable"] = info["variable"][vID][1];
+        info["standard"] = info["standard"][vID][1];
+        info["scale"] = info["scale"][vID][1];
+        info["offset"] = info["offset"][vID][1];
     end
 
-    yrs = Dates.year(start);  mos = Dates.month(start);  dys = Dates.month(start);
-    yrf = Dates.year(finish); mof = Dates.month(finish); dyf = Dates.month(finish);
+    yrs = Dates.year(start);  mos = Dates.month(start);  dys = Dates.day(start);
+    yrf = Dates.year(finish); mof = Dates.month(finish); dyf = Dates.day(finish);
     ndy = Dates.value((finish-start)/Dates.day(1)); nt = info["dayfreq"];
     dvecs = Date(yrs,mos); dvecf = Date(yrf,mof);
 
-    lon,lat = clisatlonlat(productID); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
+    lon,lat = clisatlonlat(info); rlon,rlat,rinfo = regiongridvec(region,lon,lat);
     plon,plat = coord; ilon,ilat = regionpoint(plon,plat,rlon,rlat);
 
-    datevec = convert(Array,dvecs:Dates.month(1):dvecf); ndates = length(datevec);
+    datevec = convert(Array,dvecs:Month(1):dvecf); ndates = length(datevec);
     datavec = zeros(Int16,ndy*nt);
 
     for ii = 1 : ndates; dateii = datevec[ii];
 
         fol = clisatfol(info,dateii,region);
         if !isdir(fol)
-            error(("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
+            error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
         end
 
         fnc = joinpath(fol,clisatncname(info,dateii,region));
@@ -256,21 +284,26 @@ function clisatextractpoint(
 
         if     ii == 1 && ii != ndates
             moday = daysinmonth(dateii); ibeg = (dys-1)*nt + 1; iend = (moday+1-dys)*nt;
-            datavec[1:iend] .= vds.var[ilon,ilat,ibeg:end];
+            datavec[1:iend] = vds.var[ilon,ilat,ibeg:end];
         elseif ii != 1 && ii == ndates
             ibeg = iend+1; iend = dyf*nt;
-            datavec[ibeg:end] .= vds.var[ilon,ilat,1:iend];
+            datavec[ibeg:end] = vds.var[ilon,ilat,1:iend];
         elseif ii == 1 && ii == ndates
             ibeg = (dys-1)*nt + 1; iend = dyf*nt;
-            load!(vds.var,datavec,ilon,ilat,ibeg:iend)
+            datavec = vds.var[ilon,ilat,ibeg:iend];
         else
             moday = daysinmonth(dateii); ibeg = iend+1; iend = ibeg-1 + moday*nt;
-            datavec[ibeg:iend] .= vds.var[ilon,ilat,:];
+            datavec[ibeg:iend] = vds.var[ilon,ilat,:];
         end
 
     end
 
-    return datavec,v.attrib
+    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the coordinates $(coord) has been extracted."
+
+    if !unpack; return datavec,info
+    else; offset = info["offset"]; scale = info["scale"];
+          return datavec.*scale.+offset,info
+    end
 
 end
 
@@ -278,17 +311,22 @@ function clisatextractgrid(
     productID::AbstractString, varname::AbstractString,
     start::TimeType, finish::TimeType;
     grid::Array{<:Real,1},
-    dataroot::AbstractString="",
-    region::AbstractString="GLB"
+    path::AbstractString="",
+    region::AbstractString="GLB",
+    unpack::Bool=true
 )
 
-    if dataroot == ""; dataroot = clisatroot(productID); end
-    if length(coord) != 4
+    if path == ""; dataroot = clisatroot(productID);
+    else;          dataroot = clisatroot(productID,path);
+    end
+
+    if length(grid) != 4
         error("$(Dates.now()) - Grid vector must be in the form [N,S,E,W]")
     end
 
-    info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
-    clisatinfo!(info,productID); offset = info["offset"]; scale = info["scale"];
+    info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
+
+    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the [N,S,E,W] bounds $(grid) ..."
 
     if !isdir(clisatfol(info,region))
         error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
@@ -296,26 +334,33 @@ function clisatextractgrid(
 
     if sum(info["varID"] .== varname) == 0
         error("$(Dates.now()) - There is no varname identifier $(varname) for $(info["source"]) $(info["product"])")
+    else; vID = info["varID"] .== varname;
+        info["varID"] = info["varID"][vID][1];
+        info["units"] = info["units"][vID][1];
+        info["variable"] = info["variable"][vID][1];
+        info["standard"] = info["standard"][vID][1];
+        info["scale"] = info["scale"][vID][1];
+        info["offset"] = info["offset"][vID][1];
     end
 
-    yrs = Dates.year(start);  mos = Dates.month(start);  dys = Dates.month(start);
-    yrf = Dates.year(finish); mof = Dates.month(finish); dyf = Dates.month(finish);
+    yrs = Dates.year(start);  mos = Dates.month(start);  dys = Dates.day(start);
+    yrf = Dates.year(finish); mof = Dates.month(finish); dyf = Dates.day(finish);
     ndy = Dates.value((finish-start)/Dates.day(1)); nt = info["dayfreq"];
     dvecs = Date(yrs,mos); dvecf = Date(yrf,mof);
 
-    lon,lat = clisatlonlat(productID); isgridinregion(grid,region);
+    lon,lat = clisatlonlat(info); isgridinregion(grid,region);
     rlon,rlat,rinfo = regiongridvec(region,lon,lat);
-    glon,glat,ginfo = regiongridvec(bounds,rlon,rlat); iWE,iNS = ginfo["IDvec"];
+    glon,glat,ginfo = regiongridvec(grid,rlon,rlat); iWE,iNS = ginfo["IDvec"];
     nlon = length(glon); nlat = length(glat);
 
-    datevec = convert(Array,dvecs:Dates.month(1):dvecf); ndates = length(datevec);
+    datevec = convert(Array,dvecs:Month(1):dvecf); ndates = length(datevec);
     datavec = zeros(Int16,nlon,nlat,ndy*nt);
 
     for ii = 1 : ndates; dateii = datevec[ii];
 
         fol = clisatfol(info,dateii,region);
         if !isdir(fol)
-            error(("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
+            error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
         end
 
         fnc = joinpath(fol,clisatncname(info,dateii,region));
@@ -323,20 +368,25 @@ function clisatextractgrid(
 
         if     ii == 1 && ii != ndates
             moday = daysinmonth(dateii); ibeg = (dys-1)*nt + 1; iend = (moday+1-dys)*nt;
-            datavec[:,:,1:iend] .= vds.var[iWE,iNS,ibeg:end];
+            datavec[:,:,1:iend] = vds.var[iWE,iNS,ibeg:end];
         elseif ii != 1 && ii == ndates
             ibeg = iend+1; iend = dyf*nt;
-            datavec[:,:,ibeg:end] .= vds.var[iWE,iNS,1:iend];
+            datavec[:,:,ibeg:end] = vds.var[iWE,iNS,1:iend];
         elseif ii == 1 && ii == ndates
             ibeg = (dys-1)*nt + 1; iend = dyf*nt;
-            load!(vds.var,datavec,iWE,iNS,ibeg:iend)
+            datavec = vds.var[iWE,iNS,ibeg:iend];
         else
             moday = daysinmonth(dateii); ibeg = iend+1; iend = ibeg-1 + moday*nt;
-            datavec[:,:,ibeg:iend] .= vds.var[iWE,iNS,:];
+            datavec[:,:,ibeg:iend] = vds.var[iWE,iNS,:];
         end
 
     end
 
-    return datavec,v.attrib
+    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data within the [N,S,E,W] bounds $(grid) has been extracted."
+
+    if !unpack; return datavec,info,[glon,glat]
+    else; offset = info["offset"]; scale = info["scale"];
+          return datavec.*scale.+offset,info,[glon,glat]
+    end
 
 end
