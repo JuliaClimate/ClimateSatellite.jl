@@ -65,7 +65,40 @@ end
 
 ## Functions to define Containing Folder for a particular Satellite Data Source
 
-function clisatfol(
+function clisatregfol(
+    productID::AbstractString,region::AbstractString;
+    path::AbstractString=""
+)
+
+    if path == ""; dataroot = clisatroot(productID);
+    else;          dataroot = clisatroot(productID,path);
+    end
+
+    fol = joinpath(dataroot,region);
+
+    if !isdir(fol)
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
+        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+    end
+
+    return fol
+
+end
+
+function clisatregfol(info::Dict,region::AbstractString)
+
+    fol = joinpath(info["root"],region);
+
+    if !isdir(fol)
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
+        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+    end
+
+    return fol
+
+end
+
+function clisatrawfol(
     productID::AbstractString,date::TimeType,region::AbstractString;
     path::AbstractString=""
 )
@@ -85,27 +118,7 @@ function clisatfol(
 
 end
 
-function clisatfol(
-    productID::AbstractString,region::AbstractString;
-    path::AbstractString=""
-)
-
-    if path == ""; dataroot = clisatroot(productID);
-    else;          dataroot = clisatroot(productID,path);
-    end
-
-    fol = joinpath(info["root"],region);
-
-    if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
-        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
-    end
-
-    return fol
-
-end
-
-function clisatfol(info::Dict,date::TimeType,region::AbstractString)
+function clisatrawfol(info::Dict,date::TimeType,region::AbstractString)
 
     fol = joinpath(info["root"],region,"raw",yr2str(date));
 
@@ -118,12 +131,19 @@ function clisatfol(info::Dict,date::TimeType,region::AbstractString)
 
 end
 
-function clisatfol(info::Dict,region::AbstractString)
+function clisatanafol(
+    productID::AbstractString,date::TimeType,region::AbstractString;
+    path::AbstractString=""
+)
 
-    fol = joinpath(info["root"],region);
+    if path == ""; dataroot = clisatroot(productID);
+    else;          dataroot = clisatroot(productID,path);
+    end
+
+    fol = joinpath(dataroot,region,"ana",yr2str(date));
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
         @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
 
@@ -131,7 +151,20 @@ function clisatfol(info::Dict,region::AbstractString)
 
 end
 
-function clisattmp(info::Dict)
+function clisatanafol(info::Dict,date::TimeType,region::AbstractString)
+
+    fol = joinpath(info["root"],region,"ana",yr2str(date));
+
+    if !isdir(fol)
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
+        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+    end
+
+    return fol
+
+end
+
+function clisattmpfol(info::Dict)
 
     fol = joinpath(info["root"],"tmp");
 
