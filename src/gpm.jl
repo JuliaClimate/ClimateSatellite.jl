@@ -163,7 +163,7 @@ function gpmdwn(
     fH5 = gpmh5list(date,info); gpmretrieve(fH5,date,tdir,info,overwrite);
 
     for reg in regions
-        data,grid = gpmextract(fH5,tdir,info,reg); clisatsave(data,grid,reg,info,date)
+        data,grid = gpmextract(fH5,tdir,info,reg); clisatrawsave(data,grid,reg,info,date)
     end
 
     clisatrmtmp(fH5,tdir);

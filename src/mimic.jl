@@ -115,7 +115,7 @@ function mimicdwn(
     fname,furl = mimicnclist(date); mimicretrieve(fname,furl,tdir,info,overwrite);
 
     for reg in regions
-        data,grid = mimicextract(fname,tdir,reg); clisatsave(data,grid,reg,info,date)
+        data,grid = mimicextract(fname,tdir,reg); clisatrawsave(data,grid,reg,info,date)
     end
 
     clisatrmtmp(fname,tdir);

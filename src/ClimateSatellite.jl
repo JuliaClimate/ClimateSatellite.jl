@@ -17,8 +17,9 @@ export
         gpmdwn, mimicdwn
 
 ## Including other files in the module
-include("general.jl")
 include("frontend.jl")
+include("backend.jl")
+include("raw.jl")
 include("analysis.jl")
 include("gpm.jl")
 #include("trmm.jl")
