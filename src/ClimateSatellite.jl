@@ -10,9 +10,9 @@ using ClimateEasy
 
 ## Exporting the following functions:
 export
-        clisatinfo!, clisatdwn, clisatsave,
-        clisatextractall, clisatextractpoint, clisatextractgrid,
-        clisatroot, clisatrawfol, clisatanafol, clisatncname,
+        clisatinfo!, clisatdownload, clisatrawsave,
+        clisatrawall, clisatrawpoint, clisatrawgrid,
+        clisatroot, clisatrawfol, clisatanafol, clisatrawname,
         clisatlonlat,
         gpmdwn, mimicdwn
 
