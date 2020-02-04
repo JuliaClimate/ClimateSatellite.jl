@@ -96,10 +96,10 @@ function clisatrawsave(
     if nvar != 1
         for ii = 1 : nvar
             defVar(ds,var_var[ii],data[:,:,:,ii],("longitude","latitude","time"),
-                   atts=att_var[ii]);
+                   attrib=att_var[ii]);
         end
     else;
-        defVar(ds,var_var[1],data,("longitude","latitude","time"),atts=att_var[1]);
+        defVar(ds,var_var[1],data,("longitude","latitude","time"),attrib=att_var[1]);
     end
 
     defVar(ds,"longitude",lon,("longitude",),attrib=att_lon)
