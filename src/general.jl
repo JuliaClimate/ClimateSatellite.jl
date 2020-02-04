@@ -2,9 +2,6 @@
 This file contains all the front-end scripts in ClimateSatellite.jl that are for general use regardless of satellite and product type, which includes:
     * detection of home directory on machine
     * opening an FTP request to arthuhou and jsimpson (GPM / TRMM data) servers
-    * downloading data (calls different backend functions based on satellite/product type)
-    * saving of data, with details of satellite/product attributes taken from a `Dict`
-    * satellite/product attribute information retrieval
     * creation of folders (both data folders and temporary directories)
 
 """
@@ -46,21 +43,6 @@ function clisatroot(productID::AbstractString,path::AbstractString)
 
     return pdir
 
-end
-
-# FTP Functions
-function pmmftpopen(server::AbstractString,email::AbstractString)
-    @info "$(Dates.now()) - Opening FTP request to $(server).pps.eosdis.nasa.gov."
-    return FTP("ftp://$(email):$(email)@$(server).pps.eosdis.nasa.gov")
-end
-
-function pmmftpclose(ftp)
-    @info "$(Dates.now()) - Closing FTP request."
-    close(ftp)
-end
-
-function isprod(info::Dict,product::AbstractString)
-    occursin(product,info["short"])
 end
 
 ## Functions to define Containing Folder for a particular Satellite Data Source
@@ -176,19 +158,12 @@ function clisattmpfol(info::Dict)
 
 end
 
-function clisatrmtmp(flist::Array{<:AbstractString,2},fol::AbstractString)
-
-    for ii = 1 : length(flist)
-        fii = joinpath(fol,"$(flist[ii])"); if isfile(fii); rm(fii) end
-    end
-
-end
-
-function clisatncname(productID::AbstractString,date::TimeType,region::AbstractString);
+# NetCDF Filenames
+function clisatrawname(productID::AbstractString,date::TimeType,region::AbstractString);
     return "$(productID)-$(region)-$(yrmo2str(date)).nc"
 end
 
-function clisatncname(info::Dict,date::TimeType,region::AbstractString);
+function clisatrawname(info::Dict,date::TimeType,region::AbstractString);
     return "$(info["short"])-$(region)-$(yrmo2str(date)).nc"
 end
 
