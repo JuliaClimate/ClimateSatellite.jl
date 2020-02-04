@@ -115,7 +115,7 @@ function clisatrawsave(
 end
 
 # Root Functions
-function clisatrawall(
+function clisatrawregion(
     productID::AbstractString, varname::AbstractString,
     start::TimeType, finish::TimeType;
     path::AbstractString="",

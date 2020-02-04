@@ -207,17 +207,6 @@ function clisatanafol(info::Dict,date::TimeType,region::AbstractString)
 
 end
 
-function clisattmpfol(info::Dict)
-
-    fol = joinpath(info["root"],"tmp");
-
-    if !isdir(fol)
-        @debug "$(Dates.now()) - Creating temporary directory $(fol)."; mkpath(fol);
-    end
-
-    return fol
-
-end
 
 # NetCDF Filenames
 function clisatrawname(productID::AbstractString,date::TimeType,region::AbstractString)

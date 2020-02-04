@@ -42,3 +42,15 @@ function clisatrmtmp(flist::Array{<:AbstractString,2},fol::AbstractString)
     end
 
 end
+
+function clisattmpfol(info::Dict)
+
+    fol = joinpath(info["root"],"tmp");
+
+    if !isdir(fol)
+        @debug "$(Dates.now()) - Creating temporary directory $(fol)."; mkpath(fol);
+    end
+
+    return fol
+
+end
