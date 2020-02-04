@@ -106,7 +106,7 @@ function clisatanasave(
 
     fol = clisatanafol(productID,Date(yr),region,path=path)
     fnc = joinpath(fol,clisatananame(productID,varname,yr,region));
-    nlon,nlat = grid; nt = info["dayfreq"];
+    rlon,rlat = grid; nlon = length(rlon); nlat = length(rlat); nt = info["dayfreq"];
 
     ds = Dataset(fnc,"c");
     ds.dim["longitude"] = nlon; ds.dim["latitude"] = nlat;
@@ -125,6 +125,9 @@ function clisatanasave(
 
     att_lon = Dict("units"=>"degrees_east","long_name"=>"longitude");
     att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
+
+    defVar(ds,"longitude",lon,("longitude",),attrib=att_lon)
+    defVar(ds,"latitude",lat,("latitude",),attrib=att_lat)
 
     defVar(ds,"domain_yearly_mean_climatology",data[1][:,:,nt+1,end],
            ("longitude","latitude"),atts=att_var[1]);
@@ -335,5 +338,7 @@ function clisatanasave(
     defVar(ds,"meridionalavg_monthly_minimum_diurnalvariance",
            dropdims(mean(data[2][:,:,nt+2,1:12],dims=2),dims=2),
            ("longitude","month"),atts=att_var[2]);
+
+    close(ds);
 
 end
