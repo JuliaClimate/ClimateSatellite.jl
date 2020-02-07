@@ -159,7 +159,7 @@ function gpmdwn(
     regions::Array{<:AbstractString,1}, date::TimeType, info::Dict; overwrite::Bool
 )
 
-    tdir = clisattmp(info); if !isdir(tdir) mkpath(tdir); end; gpmh5!(info)
+    tdir = clisattmpfol(info); if !isdir(tdir) mkpath(tdir); end; gpmh5!(info)
     fH5 = gpmh5list(date,info); gpmretrieve(fH5,date,tdir,info,overwrite);
 
     for reg in regions

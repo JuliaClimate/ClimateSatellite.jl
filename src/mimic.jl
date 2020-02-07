@@ -111,7 +111,7 @@ function mimicdwn(
     regions::Array{<:AbstractString,1}, date::TimeType, info::Dict; overwrite::Bool
 )
 
-    tdir = clisattmp(info); if !isdir(tdir) mkpath(tdir); end
+    tdir = clisattmpfol(info); if !isdir(tdir) mkpath(tdir); end
     fname,furl = mimicnclist(date); mimicretrieve(fname,furl,tdir,info,overwrite);
 
     for reg in regions
