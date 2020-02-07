@@ -43,7 +43,7 @@ function clisatdownload(
 end
 
 function clisatrawsave(
-    data::Array{<:Real,3}, grid::Vector{Any},
+    data::Array{<:Real}, grid::Vector{Any},
     region::AbstractString, info::Dict, date::TimeType
 )
 
@@ -80,7 +80,7 @@ function clisatrawsave(
                    "units"=>"$(tunit) since $(yrstr)-$(mostr)-1 0:0:0");
 
     if isfile(fnc)
-        @info "$(Dates.now()) - Unfinished netCDF file $(fnc) detected.  Deleting."
+        @info "$(Dates.now()) - Stale NetCDF file $(fnc) detected.  Overwriting ..."
         rm(fnc);
     end
 
@@ -95,11 +95,13 @@ function clisatrawsave(
 
     if nvar != 1
         for ii = 1 : nvar
-            defVar(ds,var_var[ii],data[:,:,:,ii],("longitude","latitude","time"),
-                   attrib=att_var[ii]);
+            v = defVar(ds,var_var[ii],Int16,("longitude","latitude","time"),
+                       attrib=att_var[ii]);
+            v.var[:] = data[:,:,:,ii];
         end
     else;
-        defVar(ds,var_var[1],data,("longitude","latitude","time"),attrib=att_var[1]);
+        v = defVar(ds,var_var[1],Int16,("longitude","latitude","time"),attrib=att_var[1]);
+        v.var[:] = data;
     end
 
     defVar(ds,"longitude",lon,("longitude",),attrib=att_lon)
