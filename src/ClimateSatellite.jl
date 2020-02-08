@@ -13,6 +13,7 @@ export
         clisatroot, clisatlonlat, clisatinfo!, clisatdownload, clisatanalysis,
         clisatrawregion, clisatrawpoint, clisatrawgrid, clisatrawfol, clisatrawname,
         clisatanaregion, clisatanapoint, clisatanagrid, clisatanafol, clisatananame,
+        clisatsubregion,
         gpmdwn, mimicdwn
 
 ## Including other files in the module
