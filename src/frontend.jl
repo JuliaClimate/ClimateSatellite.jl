@@ -29,7 +29,7 @@ end
 
 function clisatroot(productID::AbstractString,path::AbstractString)
 
-    pdir = joinpath(path,product);
+    pdir = joinpath(path,productID);
 
     if isdir(path)
 
@@ -120,8 +120,7 @@ function clisatregfol(
     fol = joinpath(dataroot,region);
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
-        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+        error("Data directory $(fol) does not exist.")
     end
 
     return fol
@@ -153,8 +152,7 @@ function clisatrawfol(
     fol = joinpath(dataroot,region,"raw",yr2str(date));
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
-        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+        error("Data directory $(fol) does not exist.")
     end
 
     return fol
@@ -186,8 +184,7 @@ function clisatanafol(
     fol = joinpath(dataroot,region,"ana",yr2str(date));
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
-        @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
+        error("Data directory $(fol) does not exist.")
     end
 
     return fol
@@ -221,14 +218,14 @@ function clisatananame(
     productID::AbstractString, varname::AbstractString,
     date::TimeType, region::AbstractString
 )
-    return "$(productID)-$(varname)-ana-$(region)-$(yrmo2str(date)).nc"
+    return "$(productID)-$(varname)-ana-$(region)-$(yr2str(date)).nc"
 end
 
 function clisatananame(
     info::Dict, varname::AbstractString,
     date::TimeType, region::AbstractString
 )
-    return "$(info["short"])-$(varname)-ana-$(region)-$(yrmo2str(date)).nc"
+    return "$(info["short"])-$(varname)-ana-$(region)-$(yr2str(date)).nc"
 end
 
 function clisatlonlat(info::Dict)

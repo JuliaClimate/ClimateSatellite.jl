@@ -4,7 +4,7 @@ module ClimateSatellite
 # variables from various satellite instruments
 
 ## Modules Used
-using Dates, Printf, DelimitedFiles
+using Dates, Printf, DelimitedFiles, Statistics
 using NCDatasets, HDF5, FTPClient, PyCall
 using ClimateEasy
 

@@ -29,36 +29,34 @@ function clisatanalysis(
     if path == ""; dataroot = clisatroot(productID);
     else;          dataroot = clisatroot(productID,path);
     end
-    if !isdir(clisatfol(info,region))
-        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
-    end
-
-    rawfol = clisatrawfol(productID,Date(yr),region,path=dataroot);
-    anafol = clisatanafol(productID,Date(yr),region,path=dataroot);
-    if !isdir(rawfol)
-        error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)).")
-    end
 
     info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
-    clisatvarinfo!(info,productID,varname=varname); cd(rawfol);
+    clisatvarinfo!(info,productID,varname=varname);
 
-    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the entire $(regionfullname(region)) region ..."
+    regfol = clisatregfol(info,region);
+    rawfol = clisatrawfol(info,Date(yr),region);
+    anafol = clisatanafol(info,Date(yr),region);
+    cd(rawfol);
+
+    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data in $(regionfullname(region)) region during $yr ..."
 
     lon,lat = clisatlonlat(info); rlon,rlat,rinfo = regiongridvec(region,lon,lat);
-    nlon = length(rlon); nlat = length(rlat); nt = info["dayfreq"]+1;
+    nlon = length(rlon); nlat = length(rlat); nt = info["dayfreq"]+1; grid = [rlon,rlat];
 
     davg = zeros(Int16,nlon,nlat,nt+1,13); dstd = zeros(Int16,nlon,nlat,nt+1,13);
     dmax = zeros(Int16,nlon,nlat,nt+1,13); dmin = zeros(Int16,nlon,nlat,nt+1,13);
 
     for mo = 1 : 12; ndy = daysinmonth(yr,mo)
 
+        @info "$(Dates.now()) - Analyzing $(info["source"]) $(info["product"]) data in $(regionfullname(region)) during $(Dates.monthname(mo)) $yr ..."
         ncraw = clisatrawname(productID,Date(yr,mo),region);
         ds = Dataset(ncraw,"r"); vds = ds[varname];
-        raw = reshape(vds.var,nlon,nlat,(nt-1),ndy);
+        raw = reshape(vds.var[:],nlon,nlat,(nt-1),ndy); jj = 0;
 
+        @debug "$(Dates.now()) - Extracting monthly diurnal climatological information ..."
         for it = 1 : nt-1, ilat = 1 : nlat, ilon = 1 : nlon
 
-            rawii = Float64(raw[ilon,ilat,it,:] .!= -32768);
+            rawii = raw[ilon,ilat,it,:]; rawii = rawii[rawii.!=-32768];
             davg[ilon,ilat,it,mo] = round(Int16,mean(rawii));
             dstd[ilon,ilat,it,mo] = round(Int16,std(rawii));
             dmax[ilon,ilat,it,mo] = round(Int16,maximum(rawii));
@@ -66,47 +64,59 @@ function clisatanalysis(
 
         end
 
-        davg[:,:,nt,mo] = round(Int16,mean(davg[:,:,1:nt-1,mo],dims=3));
-        dstd[:,:,nt,mo] = round(Int16,mean(dstd[:,:,1:nt-1,mo],dims=3));
-        dmax[:,:,nt,mo] = round(Int16,maximum(dmax[:,:,1:nt-1,mo],dims=3));
-        dmin[:,:,nt,mo] = round(Int16,minimum(dmin[:,:,1:nt-1,mo],dims=3));
+        @debug "$(Dates.now()) - Extracting monthly averaged climatological information ..."
+        davg[:,:,nt,mo] = round.(Int16,mean(davg[:,:,1:nt-1,mo],dims=3));
+        dstd[:,:,nt,mo] = round.(Int16,mean(dstd[:,:,1:nt-1,mo],dims=3));
+        dmax[:,:,nt,mo] = round.(Int16,maximum(dmax[:,:,1:nt-1,mo],dims=3));
+        dmin[:,:,nt,mo] = round.(Int16,minimum(dmin[:,:,1:nt-1,mo],dims=3));
 
-        raw = permutedims(raw,(1,2,4,3)); tmp = zeros(Int16,nlon,nlat,ndy);
-        for it = 1 : ndy, ilat = 1 : nlat, ilon = 1 : nlon
+        @debug "$(Dates.now()) - Permuting days and hours dimensions ..."
+        raw = permutedims(raw,(1,2,4,3)); tmp = zeros(nlon,nlat,ndy);
 
-            tmpii = raw[ilon,ilat,it,:] .!= -32768
-            tmp[ilon,ilat,it] = maximum(tmpii)/2 - minimum(tmpii)/2;
+        @debug "$(Dates.now()) - Extracting diurnal variability information ..."
+        for idy = 1 : ndy, ilat = 1 : nlat, ilon = 1 : nlon
 
-        end
-        for ilat = 1 : nlat, ilon = 1 : nlon
-
-            rawii = tmp[ilon,ilat,:];
-            davg[ilon,ilat,nt+1,mo] = round(Int16,mean(rawii));
-            dstd[ilon,ilat,nt+1,mo] = round(Int16,std(rawii));
-            dmax[ilon,ilat,nt+1,mo] = round(Int16,maximum(rawii));
-            dmin[ilon,ilat,nt+1,mo] = round(Int16,minimum(rawii));
+            tmpii = raw[ilon,ilat,idy,:]; tmpii = tmpii[tmpii.!=-32768];
+            tmp[ilon,ilat,idy] = maximum(tmpii)/2 - minimum(tmpii)/2;
 
         end
+
+        @debug "$(Dates.now()) - Extracting monthly diurnal variability information ..."
+        davg[:,:,nt+1,mo] = round.(Int16,mean(tmp,dims=3));
+        dstd[:,:,nt+1,mo] = round.(Int16,std(tmp,dims=3));
+        dmax[:,:,nt+1,mo] = round.(Int16,maximum(tmp,dims=3));
+        dmin[:,:,nt+1,mo] = round.(Int16,minimum(tmp,dims=3));
 
     end
 
-    mean!(davg[:,:,:,end],davg[:,:,:,1:12]); maximum!(dmax[:,:,:,end],dmax[:,:,:,1:12]);
-    mean!(dstd[:,:,:,end],dstd[:,:,:,1:12]); maximum!(dmin[:,:,:,end],dmin[:,:,:,1:12]);
+    @info "$(Dates.now()) - Calculating yearly climatology for $(info["source"]) $(info["product"]) in $(regionfullname(region)) during $yr ..."
+    davg[:,:,:,end] = round.(Int16,mean(davg[:,:,:,1:12],dims=4));
+    dstd[:,:,:,end] = round.(Int16,mean(dstd[:,:,:,1:12],dims=4));
+    dmax[:,:,:,end] = round.(Int16,maximum(dmax[:,:,:,1:12],dims=4));
+    dmin[:,:,:,end] = round.(Int16,minimum(dmin[:,:,:,1:12],dims=4));
 
-    grid = [rlon,rlat]
     clisatanasave([davg,dstd,dmax,dmin],grid,productID,varname,yr,path,region,info);
 
 end
 
 function clisatanasave(
-    data::Array{Array{Int16,4},1}, grid::Vector{Any},
+    data::Array{Array{Int16,4},1}, grid::Vector{<:Any},
     productID::AbstractString, varname::AbstractString, yr::Integer,
     path::AbstractString, region::AbstractString, info::Dict
 )
 
+    @info "$(Dates.now()) - Saving analysed $(info["source"]) $(info["product"]) data in $(regionfullname(region)) for the year $yr ..."
+
     fol = clisatanafol(productID,Date(yr),region,path=path)
-    fnc = joinpath(fol,clisatananame(productID,varname,yr,region));
+    fnc = joinpath(fol,clisatananame(productID,varname,Date(yr),region));
     rlon,rlat = grid; nlon = length(rlon); nlat = length(rlat); nt = info["dayfreq"];
+
+    if isfile(fnc)
+        @info "$(Dates.now()) - Stale NetCDF file $(fnc) detected.  Overwriting ..."
+        rm(fnc);
+    end
+
+    @debug "$(Dates.now()) - Creating NetCDF file $(fnc) for analyzed $(info["source"]) $(info["product"]) data in $yr ..."
 
     ds = Dataset(fnc,"c");
     ds.dim["longitude"] = nlon; ds.dim["latitude"] = nlat;
@@ -126,8 +136,10 @@ function clisatanasave(
     att_lon = Dict("units"=>"degrees_east","long_name"=>"longitude");
     att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
 
-    defVar(ds,"longitude",lon,("longitude",),attrib=att_lon)
-    defVar(ds,"latitude",lat,("latitude",),attrib=att_lat)
+    defVar(ds,"longitude",rlon,("longitude",),attrib=att_lon)
+    defVar(ds,"latitude",rlat,("latitude",),attrib=att_lat)
+
+    @debug "$(Dates.now()) - Saving analyzed $(info["source"]) $(info["product"]) data for $yr to NetCDF file $(fnc) ..."
 
     v = defVar(ds,"domain_yearly_mean_climatology",Int16,
                ("longitude","latitude"),attrib=att_var[1]);
@@ -169,7 +181,6 @@ function clisatanasave(
 
     v = defVar(ds,"domain_yearly_std_diurnalvariance",Int16,
                ("longitude","latitude"),attrib=att_var[2]);
-
     v.var[:] = data[2][:,:,nt+2,end];
 
     v = defVar(ds,"domain_yearly_maximum_diurnalvariance",Int16,
@@ -436,5 +447,7 @@ function clisatanasave(
     v.var[:] = dropdims(mean(data[4][:,:,nt+2,1:12],dims=2),dims=2);
 
     close(ds);
+
+    @info "$(Dates.now()) - Analysed $(info["source"]) $(info["product"]) data for the year $yr in $(regionfullname(region)) has been saved into file $(fnc) and moved to the data directory $(fol)."
 
 end
