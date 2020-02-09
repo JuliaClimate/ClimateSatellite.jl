@@ -16,10 +16,10 @@ end
 function mimicnclist(date::TimeType)
 
     yr = Dates.year(date); mo = Dates.month(date); ndy = daysinmonth(date);
-    fname = Array{AbstractString,1}(undef,48*ndy);
+    fname = Array{AbstractString,2}(undef,24,ndy);
 
     @debug "$(Dates.now()) - Creating list of data files to download ..."
-    for dy = 1 : ndy; date = Date(yr,mo,ii);
+    for dy = 1 : ndy; date = Date(yr,mo,dy);
         for hh = 1 : 24
 
             fname[hh,dy] = "comp$(ymd2str(date)).$(@sprintf("%02d",hh-1))0000.nc";
@@ -51,7 +51,7 @@ end
 
 function mimicretrieve(
     fname::Array{<:AbstractString,2},
-    furl::Array{<:AbstractString,2},
+    furl::AbstractString, date::TimeType,
     tdir::AbstractString, info::Dict, overwrite::Bool
 )
 
@@ -76,7 +76,7 @@ function mimicextract(
     data = zeros(Int16,nrlon,nrlat,nt); dataii = zeros(Int16,nrlon,nrlat);
     rawi = zeros(nlon,nlat); raw = zeros(nlon,nlat); tmp = zeros(nrlon,nrlat);
 
-    @info "$(Dates.now()) - Extracted regional $(info["product"]) data for $(rinfo["fullname"])."
+    @info "$(Dates.now()) - Extracting regional $(info["product"]) data for $(rinfo["fullname"])."
 
     for ii = 1 : nt
 
@@ -84,7 +84,7 @@ function mimicextract(
         if isfile(fii)
 
             try
-                ncread!(fii,"tpwGrid",raw);
+                ds = Dataset(fii); raw = ds["tpwGrid"].var[:];
                 tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
                 real2int16!(dataii,tmp,offset=60,scale=60/32767);
                 data[:,:,ii] .= dataii;
@@ -112,10 +112,11 @@ function mimicdwn(
 )
 
     tdir = clisattmpfol(info); if !isdir(tdir) mkpath(tdir); end
-    fname,furl = mimicnclist(date); mimicretrieve(fname,furl,tdir,info,overwrite);
+    fname,furl = mimicnclist(date); mimicretrieve(fname,furl,date,tdir,info,overwrite);
 
     for reg in regions
-        data,grid = mimicextract(fname,tdir,reg); clisatrawsave(data,grid,reg,info,date)
+        data,grid = mimicextract(fname,tdir,info,reg);
+        clisatrawsave(data,grid,reg,info,date)
     end
 
     clisatrmtmp(fname,tdir);

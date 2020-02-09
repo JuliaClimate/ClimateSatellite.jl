@@ -30,7 +30,7 @@ function clisatdownload(
         if     isprod(info,"gpm");  gpmdwn(regions,date,info,overwrite=overwrite);
         elseif isprod(info,"3b42"); trmmdwn(regions,date,info,overwrite=overwrite);
         end
-    elseif info["source"] == "MIMIC"; mtpwdwn(regions,date,info);
+    elseif info["source"] == "MIMIC"; mimicdwn(regions,date,info,overwrite=overwrite);
     elseif info["source"] == "RSS"
         if     isprod(info,"trmm"); rtmidwn(regions,date,info,email,overwrite=overwrite);
         elseif isprod(info,"gpm");  rgmidwn(regions,date,info,email,overwrite=overwrite);
@@ -112,7 +112,7 @@ function clisatrawsave(
 
     ## Write data end
 
-    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the $(regionfullname(region)) region has been saved into file $(fnc) and moved to the data directory $(fol)."
+    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the $(regionfullname(region)) region has been saved into file $(fnc)"
 
 end
 
