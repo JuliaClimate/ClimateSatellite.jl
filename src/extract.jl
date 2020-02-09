@@ -1,7 +1,7 @@
 function clisatsubregion(
     productID::AbstractString, date::TimeType;
     path::AbstractString="",
-    region::AbstractString="GLB"
+    region::AbstractString="GLB",
     overwrite::Bool=false
 )
 
@@ -20,13 +20,14 @@ function clisatsubregion(
     end
 
     folp = clisatrawfol(info,date,parent);
-    fncp = joinpath(fol,clisatrawname(info,date,parent));
-    if !isdir(fol)
+    fncp = joinpath(folp,clisatrawname(info,date,parent));
+    if !isdir(folp)
         error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)) in the parent region: $(regionfullname(parent))")
     end
 
     pds  = Dataset(fncp,"r");
-    plon = ds["longitude"].var[:]; plat = ds["latitude"].var[:]; time = ds["time"].var[:];
+    plon = pds["longitude"].var[:]; plat = pds["latitude"].var[:];
+    time = pds["time"].var[:];
 
     rlon,rlat,rinfo = regiongridvec(region,plon,plat); iWE,iNS = rinfo["IDvec"];
     nlon = length(rlon); nlat = length(rlat); nt = length(time);
@@ -45,41 +46,41 @@ function clisatsubregion(
         att_var[ii]["missing_value"] = -32768;
     end
 
-    att_lon = ds["longitude"].attrib;
-    att_lat = ds["latitude"].attrib;
-    att_t   = ds["time"].attrib;
+    att_lon = pds["longitude"].attrib;
+    att_lat = pds["latitude"].attrib;
+    att_t   = pds["time"].attrib;
 
     folr = clisatrawfol(info,date,region);
-    fncr = joinpath(fol,clisatrawname(info,date,region));
+    fncr = joinpath(folr,clisatrawname(info,date,region));
 
-    if isfile(fnc)
+    if isfile(fncr)
         @info "$(Dates.now()) - Stale NetCDF file $(fncr) detected.  Overwriting ..."
-        rm(fnc);
+        rm(fncr);
     end
 
     ## Write data here
 
-    @debug "$(Dates.now()) - Creating $(info["source"]) $(info["product"]) netCDF file $(fnc) ..."
+    @debug "$(Dates.now()) - Creating $(info["source"]) $(info["product"]) netCDF file $(fncr) ..."
 
     ds = Dataset(fncr,"c");
     ds.dim["longitude"] = nlon; ds.dim["latitude"] = nlat; ds.dim["time"] = nt;
 
-    @debug "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) data to netCDF file $(fnc) ..."
+    @debug "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) data to netCDF file $(fncr) ..."
 
     if nvar != 1
         for ii = 1 : nvar
             v = defVar(ds,var_var[ii],Int16,("longitude","latitude","time"),
                        attrib=att_var[ii]);
-            v.var[:] = ds[var_var[ii]].var[iWE,iNS,:];
+            v.var[:] = pds[var_var[ii]].var[iWE,iNS,:];
         end
     else;
         v = defVar(ds,var_var[1],Int16,("longitude","latitude","time"),attrib=att_var[1]);
-        v.var[:] = ds[var_var[1]].var[iWE,iNS,:];
+        v.var[:] = pds[var_var[1]].var[iWE,iNS,:];
     end
 
-    defVar(ds,"longitude",lon,("longitude",),attrib=att_lon)
-    defVar(ds,"latitude",lat,("latitude",),attrib=att_lat)
-    defVar(ds,"time",t,("time",),attrib=att_t)
+    defVar(ds,"longitude",rlon,("longitude",),attrib=att_lon)
+    defVar(ds,"latitude",rlat,("latitude",),attrib=att_lat)
+    defVar(ds,"time",time,("time",),attrib=att_t)
 
     close(ds); close(pds);
 
