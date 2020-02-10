@@ -84,7 +84,7 @@ function mimicextract(
         if isfile(fii)
 
             try
-                ds = Dataset(fii); raw = ds["tpwGrid"].var[:];
+                ds = Dataset(fii); raw = ds["tpwGrid"].var[:]; close(ds);
                 tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
                 real2int16!(dataii,tmp,offset=60,scale=60/32767);
                 data[:,:,ii] .= dataii;
