@@ -1,11 +1,7 @@
 name = "ClimateSatellite"
 uuid = "d91beb5f-3141-4656-855d-efd5d97b23c4"
 authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
-<<<<<<< HEAD
 version = "0.2.3"
-=======
-version = "0.2.2"
->>>>>>> 300b1c9ad361109890886d24114d7a81854e08b8
 
 [deps]
 ClimateEasy = "47ceb0c8-0fe6-4c49-a4a1-92bc59187c00"
