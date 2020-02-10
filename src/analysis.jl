@@ -127,11 +127,10 @@ function clisatanasave(
         att_var[ii]["units"]         = info["units"];
         att_var[ii]["standard_name"] = info["standard"];
         att_var[ii]["long_name"]     = info["variable"];
-        att_var[ii]["add_offset"]    = info["offset"];
         att_var[ii]["missing_value"] = -32768;
     end
-    att_var[1]["scale_factor"]  = info["scale"];
-    att_var[2]["scale_factor"]  = info["scale"]*2;
+    att_var[1]["scale_factor"] = info["scale"];   att_var[1]["add_offset"] = info["offset"];
+    att_var[2]["scale_factor"] = info["scale"]*2; att_var[2]["add_offset"] = 0;
 
     att_lon = Dict("units"=>"degrees_east","long_name"=>"longitude");
     att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
