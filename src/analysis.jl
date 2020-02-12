@@ -51,7 +51,7 @@ function clisatanalysis(
         @info "$(Dates.now()) - Analyzing $(info["source"]) $(info["product"]) data in $(regionfullname(region)) during $(Dates.monthname(mo)) $yr ..."
         ncraw = clisatrawname(productID,Date(yr,mo),region);
         ds = Dataset(ncraw,"r"); vds = ds[varname];
-        raw = reshape(vds.var[:],nlon,nlat,(nt-1),ndy); jj = 0;
+        raw = reshape(vds.var[:],nlon,nlat,(nt-1),ndy);
 
         @debug "$(Dates.now()) - Extracting monthly diurnal climatological information ..."
         for it = 1 : nt-1, ilat = 1 : nlat, ilon = 1 : nlon
@@ -316,15 +316,15 @@ function clisatanasave(
 
     v = defVar(ds,"zonalavg_monthly_std_hourly",Int16,
                ("latitude","hour","month"),attrib=att_var[1]);
-    v.var[:] = dropdims(mean(data[1][:,:,1:nt,1:12],dims=1),dims=1);
+    v.var[:] = dropdims(mean(data[2][:,:,1:nt,1:12],dims=1),dims=1);
 
     v = defVar(ds,"zonalavg_monthly_maximum_hourly",Int16,
                ("latitude","hour","month"),attrib=att_var[1]);
-    v.var[:] = dropdims(mean(data[1][:,:,1:nt,1:12],dims=1),dims=1);
+    v.var[:] = dropdims(mean(data[3][:,:,1:nt,1:12],dims=1),dims=1);
 
     v = defVar(ds,"zonalavg_monthly_minimum_hourly",Int16,
                ("latitude","hour","month"),attrib=att_var[1]);
-    v.var[:] = dropdims(mean(data[1][:,:,1:nt,1:12],dims=1),dims=1);
+    v.var[:] = dropdims(mean(data[4][:,:,1:nt,1:12],dims=1),dims=1);
 
 
     v = defVar(ds,"zonalavg_monthly_mean_diurnalvariance",Int16,
