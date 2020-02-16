@@ -134,12 +134,21 @@ function gpmextract(
         fH5ii = joinpath(fol,fH5[ii]);
         if isfile(fH5ii)
 
-            rawii = h5read("$(fH5ii)","/Grid/precipitationCal");
-            @debug "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
-            permutedims!(raw,rawii,[2,1,3]);
-            tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
-            real2int16!(dataii,tmp,offset=163.835,scale=1/200);
-            data[:,:,ii] .= dataii;
+            try
+
+                rawii = h5read("$(fH5ii)","/Grid/precipitationCal");
+                @debug "$(Dates.now()) - raw GPM precipitation data is given in (lat,lon) instead of (lon,lat).  Permuting to (lon,lat)"
+                permutedims!(raw,rawii,[2,1,3]);
+                tmp .= regionextractgrid(raw,rinfo,lon,lat,rawi)
+                real2int16!(dataii,tmp,offset=163.835,scale=1/200);
+                data[:,:,ii] .= dataii;
+
+            catch
+
+                @warn "$(Dates.now()) - Unable to extract/open $(fH5ii).  Setting GPM data values set to 'missing'."
+                data[:,:,ii] .= -32768;
+
+            end
 
         else
 
