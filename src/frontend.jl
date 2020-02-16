@@ -173,7 +173,7 @@ function clisatrawfol(info::Dict,date::TimeType,region::AbstractString)
 end
 
 function clisatanafol(
-    productID::AbstractString,date::TimeType,region::AbstractString;
+    productID::AbstractString,region::AbstractString;
     path::AbstractString=""
 )
 
@@ -181,7 +181,7 @@ function clisatanafol(
     else;          dataroot = clisatroot(productID,path);
     end
 
-    fol = joinpath(dataroot,region,"ana",yr2str(date));
+    fol = joinpath(dataroot,region,"ana");
 
     if !isdir(fol)
         error("Data directory $(fol) does not exist.")
@@ -191,12 +191,12 @@ function clisatanafol(
 
 end
 
-function clisatanafol(info::Dict,date::TimeType,region::AbstractString)
+function clisatanafol(info::Dict,region::AbstractString)
 
-    fol = joinpath(info["root"],region,"ana",yr2str(date));
+    fol = joinpath(info["root"],region,"ana");
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
         @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
 
