@@ -161,7 +161,7 @@ function clisatanasave(
 
     @info "$(Dates.now()) - Saving analysed $(info["source"]) $(info["product"]) data in $(regionfullname(region)) for the year $yr ..."
 
-    fol = clisatanafol(info,path=path)
+    fol = clisatanafol(info,region)
     fnc = joinpath(fol,clisatananame(productID,varname,Date(yr),region));
     rlon,rlat = grid; nlon = length(rlon); nlat = length(rlat); nt = info["dayfreq"];
 
