@@ -38,12 +38,12 @@ product types), can be found in the `satellites.txt` file, along with their prop
 units of measurement, etc.  However, only the following combinations of Missions / Products
 are currently valid in ClimateSatellite - all other options will throw an error.
 
-ID | Mission | Product
---- | --- | ---
+    ID   | Mission | Product
+  :---:  | :---: | ---
 gpmimerg |  PMM  | Global Precipitation Mission - IMERGv6 Final Research Version
 gpmlate  |  PMM  | Global Precipitation Mission - IMERGv6 Near Real-Time Late Run
 gpmearly |  PMM  | Global Precipitation Mission - IMERGv6 Near Real-Time Early Run
-mtpw2m   | MIMIC | TPW2m
+mtpw2m   | MIMIC | Total Precipitable Water v2m
 
 
 ## Workflow
