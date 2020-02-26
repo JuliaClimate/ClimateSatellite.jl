@@ -47,7 +47,50 @@ are currently valid in ClimateSatellite - all other options will throw an error.
 
 
 ## Workflow
-By default, `ClimateSatellite.jl` saves all data into a `data` repository that is user-specified, or else it will otherwise default to
+
+### Directories
+By default, `ClimateSatellite.jl` saves all data into a `datadir` repository that is user-specified, or else it will otherwise default to
 ```
-datadir="~/research/data/$(satellite_acronym)"
+datadir="~/research/data/$(ID)"
+```
+
+### Regions
+ClimateSatellite utlizes `GeoRegions.jl` to specify domains from which data is to be extracted.  If the option is not specified, then `ClimateSatellite` will assume that the
+user wishes to process **global** data (which may not be wise especially for GPM due to the
+large file sizes involved and memory required).
+
+### Downloads
+ClimateSatellite aims to streamline the downloading process by ensuring that the frontend
+functions for the user are standard regardless of mission or product type.  For example, if
+I wanted to download **global** GPM IMERG research data for January 2007, I would do it by
+```
+clisatdownload("gpmimerg",Date(2007,1),email=example@domain.com);
+```
+
+If I wanted to specify that the data is to go into a specific path `ddir`, I would do
+```
+clisatdownload("gpmimerg",Date(2007,1),email=example@domain.com,path=ddir);
+```
+
+And if I wanted to specify that I wanted to keep only information within the `TRP` domain
+as specified in `GeoRegions.jl `(Tropical Belt, [N,S,W,E] = [30,-30,0,360]), I would do
+```
+clisatdownload("gpmimerg",Date(2007,1),email=example@domain.com,regions=["TRP"],path=ddir);
+```
+
+And if I wanted to do all the above, except for MIMIC-TPW2m data, I would do:
+```
+clisatdownload("mtpw2m",Date(2007,1),email=example@domain.com);
+clisatdownload("mtpw2m",Date(2007,1),email=example@domain.com,path=ddir);
+clisatdownload("mtpw2m",Date(2007,1),email=example@domain.com,regions=["TRP"],path=ddir);
+```
+
+### Extraction of Subdomains
+However, sometimes you don't want to keep redownloading data (especially since due to file
+size it can take a long time) and therefore sometimes you might want to extract data from
+within a subdomain.
+
+For example, in `GeoRegions.jl`, `SMT` (Sumatra, [N,S,W,E] = [6,-6,95,107]) is within the `TRP` domain.  If you have already downloaded data for the `TRP` domain, you can therefore extraction data for the `SMT` region using:
+```
+clisatsubregion("gpmimerg",Date(2007,1),region="SMT",path=ddir);
 ```
