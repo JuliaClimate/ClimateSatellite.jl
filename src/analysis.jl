@@ -42,7 +42,7 @@ function clisatanalysis(
     rawfol = clisatrawfol(info,Date(yr),region);
     cd(rawfol);
 
-    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data in $(regionfullname(region)) region during $yr ..."
+    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data in $(gregionfullname(region)) region during $yr ..."
 
     lon,lat = clisatlonlat(info); rlon,rlat,rinfo = regiongridvec(region,lon,lat);
     nlon = length(rlon); nlat = length(rlat); nt = info["dayfreq"]+1; grid = [rlon,rlat];
@@ -58,7 +58,7 @@ function clisatanalysis(
 
     for mo = 1 : 12; ndy = daysinmonth(yr,mo)
 
-        @info "$(Dates.now()) - Analyzing $(info["source"]) $(info["product"]) data in $(regionfullname(region)) during $(Dates.monthname(mo)) $yr ..."
+        @info "$(Dates.now()) - Analyzing $(info["source"]) $(info["product"]) data in $(gregionfullname(region)) during $(Dates.monthname(mo)) $yr ..."
         ncraw = clisatrawname(productID,Date(yr,mo),region);
         ds = Dataset(ncraw,"r"); vds = ds[varname];
         raw = reshape(vds.var[:],nlon,nlat,(nt-1),ndy);
@@ -119,7 +119,7 @@ function clisatanalysis(
 
     end
 
-    @info "$(Dates.now()) - Calculating yearly climatology for $(info["source"]) $(info["product"]) in $(regionfullname(region)) during $yr ..."
+    @info "$(Dates.now()) - Calculating yearly climatology for $(info["source"]) $(info["product"]) in $(gregionfullname(region)) during $yr ..."
     for it = 1 : nt+1, ilat = 1 : nlat, ilon = 1 : nlon
 
         davg[ilon,ilat,it,end] = round.(Int16,clisatopNaN(mean,davg[ilon,ilat,it,1:12]));
@@ -129,7 +129,7 @@ function clisatanalysis(
 
     end
 
-    @info "$(Dates.now()) - Calculating zonal-averaged climatology for $(info["source"]) $(info["product"]) in $(regionfullname(region)) during $yr ..."
+    @info "$(Dates.now()) - Calculating zonal-averaged climatology for $(info["source"]) $(info["product"]) in $(gregionfullname(region)) during $yr ..."
     for ilat = 1 : nlat, it = 1 : nt+1, imo = 1 : 13
         zavg[ilat,it,imo] = round.(Int16,clisatopNaN(mean,davg[:,ilat,it,imo]));
         zstd[ilat,it,imo] = round.(Int16,clisatopNaN(mean,dstd[:,ilat,it,imo]));
@@ -137,7 +137,7 @@ function clisatanalysis(
         zmin[ilat,it,imo] = round.(Int16,clisatopNaN(mean,dmin[:,ilat,it,imo]));
     end
 
-    @info "$(Dates.now()) - Calculating meridional-averaged climatology for $(info["source"]) $(info["product"]) in $(regionfullname(region)) during $yr ..."
+    @info "$(Dates.now()) - Calculating meridional-averaged climatology for $(info["source"]) $(info["product"]) in $(gregionfullname(region)) during $yr ..."
     for imo = 1 : 13, it = 1 : nt+1, ilon = 1 : nlon
         mavg[ilon,it,imo] = round.(Int16,clisatopNaN(mean,davg[ilon,:,it,imo]));
         mstd[ilon,it,imo] = round.(Int16,clisatopNaN(mean,dstd[ilon,:,it,imo]));
@@ -159,7 +159,7 @@ function clisatanasave(
     path::AbstractString, region::AbstractString, info::Dict
 )
 
-    @info "$(Dates.now()) - Saving analysed $(info["source"]) $(info["product"]) data in $(regionfullname(region)) for the year $yr ..."
+    @info "$(Dates.now()) - Saving analysed $(info["source"]) $(info["product"]) data in $(gregionfullname(region)) for the year $yr ..."
 
     fol = clisatanafol(info,region)
     fnc = joinpath(fol,clisatananame(productID,varname,Date(yr),region));
@@ -501,6 +501,6 @@ function clisatanasave(
 
     close(ds);
 
-    @info "$(Dates.now()) - Analysed $(info["source"]) $(info["product"]) data for the year $yr in $(regionfullname(region)) has been saved into file $(fnc) and moved to the data directory $(fol)."
+    @info "$(Dates.now()) - Analysed $(info["source"]) $(info["product"]) data for the year $yr in $(gregionfullname(region)) has been saved into file $(fnc) and moved to the data directory $(fol)."
 
 end

@@ -47,7 +47,7 @@ function clisatrawsave(
     region::AbstractString, info::Dict, date::TimeType
 )
 
-    @info "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) data for the $(regionfullname(region)) region..."
+    @info "$(Dates.now()) - Saving $(info["source"]) $(info["product"]) data for the $(gregionfullname(region)) region..."
 
     fol = clisatrawfol(info,date,region);
     fnc = joinpath(fol,clisatrawname(info,date,region)); lon,lat,t,tunit = grid;
@@ -112,7 +112,7 @@ function clisatrawsave(
 
     ## Write data end
 
-    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the $(regionfullname(region)) region has been saved into file $(fnc)"
+    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the $(gregionfullname(region)) region has been saved into file $(fnc)"
 
 end
 
@@ -131,10 +131,10 @@ function clisatrawregion(
 
     info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
 
-    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the entire $(regionfullname(region)) region ..."
+    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the entire $(gregionfullname(region)) region ..."
 
     if !isdir(clisatregfol(info,region))
-        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
+        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(gregionfullname(region))")
     end
 
     clisatvarinfo!(info,productID,varname=varname);
@@ -173,7 +173,7 @@ function clisatrawregion(
 
     end
 
-    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the entire $(regionfullname(region)) region has been extracted."
+    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the entire $(gregionfullname(region)) region has been extracted."
 
     if !unpack; return datavec,info,[rlon,rlat]
     else; offset = info["offset"]; scale = info["scale"];
@@ -204,7 +204,7 @@ function clisatrawpoint(
     @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data at coordinates $(coord) ..."
 
     if !isdir(clisatregfol(info,region))
-        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
+        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(gregionfullname(region))")
     end
 
     clisatvarinfo!(info,productID,varname=varname);
@@ -274,7 +274,7 @@ function clisatrawgrid(
     @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the [N,S,E,W] bounds $(grid) ..."
 
     if !isdir(clisatregfol(info,region))
-        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(regionfullname(region))")
+        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the $(gregionfullname(region))")
     end
 
     clisatvarinfo!(info,productID,varname=varname);

@@ -132,7 +132,7 @@ function clisatregfol(info::Dict,region::AbstractString)
     fol = joinpath(info["root"],region);
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(gregionfullname(region)) region does not exist."
         @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
 
@@ -164,7 +164,7 @@ function clisatrawfol(info::Dict,date::TimeType,region::AbstractString)
     fol = joinpath(info["root"],region,"raw",yr2str(date));
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region and year $(yr2str(date)) does not exist."
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(gregionfullname(region)) region and year $(yr2str(date)) does not exist."
         @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
 
@@ -196,7 +196,7 @@ function clisatanafol(info::Dict,region::AbstractString)
     fol = joinpath(info["root"],region,"ana");
 
     if !isdir(fol)
-        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(regionfullname(region)) region does not exist."
+        @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data directory for the $(gregionfullname(region)) region does not exist."
         @debug "$(Dates.now()) - Creating data directory $(fol)."; mkpath(fol);
     end
 

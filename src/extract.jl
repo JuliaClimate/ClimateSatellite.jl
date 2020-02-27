@@ -11,18 +11,18 @@ function clisatsubregion(
 
     info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
 
-    parent = regionparent(region);
+    parent = gregionparent(region);
 
-    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the entire $(regionfullname(region)) region ..."
+    @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the entire $(gregionfullname(region)) region ..."
 
     if !isdir(clisatregfol(info,parent))
-        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the parent region: $(regionfullname(parent))")
+        error("$(Dates.now()) - No data has been downloaded from $(info["source"]) $(info["product"]) in the parent region: $(gregionfullname(parent))")
     end
 
     folp = clisatrawfol(info,date,parent);
     fncp = joinpath(folp,clisatrawname(info,date,parent));
     if !isdir(folp)
-        error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)) in the parent region: $(regionfullname(parent))")
+        error("$(Dates.now()) - There is no data for $(info["source"]) $(info["product"]) for $(yrmo2dir(dateii)) in the parent region: $(gregionfullname(parent))")
     end
 
     pds  = Dataset(fncp,"r");
@@ -86,6 +86,6 @@ function clisatsubregion(
 
     ## Write data end
 
-    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the $(regionfullname(region)) region has been saved into file $(fncr) and moved to the data directory $(folr)."
+    @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the $(gregionfullname(region)) region has been saved into file $(fncr) and moved to the data directory $(folr)."
 
 end
