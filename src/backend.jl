@@ -6,7 +6,7 @@ This file contains all the front-end scripts in ClimateSatellite.jl that are for
 
 """
 
-# FTP Functions
+## FTP Functions
 function pmmftpopen(server::AbstractString,email::AbstractString)
     @info "$(Dates.now()) - Opening FTP request to $(server).pps.eosdis.nasa.gov."
     return FTP("ftp://$(email):$(email)@$(server).pps.eosdis.nasa.gov")
@@ -17,7 +17,7 @@ function pmmftpclose(ftp)
     close(ftp)
 end
 
-# Other Functions
+## Other Functions
 function isprod(info::Dict,product::AbstractString)
     occursin(product,info["short"])
 end
@@ -52,5 +52,42 @@ function clisattmpfol(info::Dict)
     end
 
     return fol
+
+end
+
+## DateString Aliasing
+function yrmo2dir(date::TimeType) = Dates.format(date,dateformat"yyyy/mm") end
+function yrmo2str(date::TimeType) = Dates.format(date,dateformat"yyyymm") end
+function yr2str(date::TimeType)   = Dates.format(date,dateformat"yyyy") end
+function ymd2str(date::TimeType)  = Dates.format(date,dateformat"yyyymmdd") end
+
+## Real2Integer Conversion for Packing
+function real2int16!(
+    outarray::Array{Int16}, inarray::Array{<:Real};
+    offset::Real, scale::Real
+)
+
+    if size(outarray) != size(inarray)
+        dout = [i for i in size(outarray)];
+        din  = [i for i in size(inarray)];
+        if (dout[1:end-1] != din[1:end] && dout[1:end] != din[1:end-1]) ||
+            prod(dout) != prod(din)
+            error("$(Dates.now()) - output array is not of the same size as the input array")
+        end
+    end
+
+    for ii = 1 : length(inarray)
+
+        inarray[ii] = (inarray[ii] - offset) / scale
+
+        if inarray[ii] < -32767; inarray[ii] = -32768
+        elseif inarray[ii] > 32767; inarray[ii] = -32768
+        end
+
+        outarray[ii] = round(Int16,inarray[ii])
+
+    end
+
+    return
 
 end
