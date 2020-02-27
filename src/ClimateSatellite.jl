@@ -6,7 +6,7 @@ module ClimateSatellite
 ## Modules Used
 using Dates, Printf, DelimitedFiles, Statistics
 using NCDatasets, HDF5, FTPClient, PyCall
-using ClimateEasy
+using GeoRegions
 
 ## Exporting the following functions:
 export
@@ -23,7 +23,6 @@ include("raw.jl")
 include("analysis.jl")
 include("extract.jl")
 include("gpm.jl")
-#include("trmm.jl")
 include("mimic.jl")
 #include("modis.jl")
 #include("rss.jl")
