@@ -68,7 +68,7 @@ function mimicextract(
     reg::AbstractString="GLB"
 )
 
-    lon,lat = mimiclonlat(); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
+    lon,lat = mimiclonlat(); rlon,rlat,rinfo = gregiongridvec(reg,lon,lat);
     nlon = length(lon); nrlon = length(rlon);
     nlat = length(lat); nrlat = length(rlat);
     nt = length(fname); rtime = convert(Array,1:nt); tunit = "hours";

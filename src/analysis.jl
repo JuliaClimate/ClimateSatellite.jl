@@ -44,7 +44,7 @@ function clisatanalysis(
 
     @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data in $(gregionfullname(region)) region during $yr ..."
 
-    lon,lat = clisatlonlat(info); rlon,rlat,rinfo = regiongridvec(region,lon,lat);
+    lon,lat = clisatlonlat(info); rlon,rlat,rinfo = gregiongridvec(region,lon,lat);
     nlon = length(rlon); nlat = length(rlat); nt = info["dayfreq"]+1; grid = [rlon,rlat];
 
     davg = rand(Int16,nlon,nlat,nt+1,13); dstd = rand(Int16,nlon,nlat,nt+1,13);

@@ -29,7 +29,7 @@ function clisatsubregion(
     plon = pds["longitude"].var[:]; plat = pds["latitude"].var[:];
     time = pds["time"].var[:];
 
-    rlon,rlat,rinfo = regiongridvec(region,plon,plat); iWE,iNS = rinfo["IDvec"];
+    rlon,rlat,rinfo = gregiongridvec(region,plon,plat); iWE,iNS = rinfo["IDvec"];
     nlon = length(rlon); nlat = length(rlat); nt = length(time);
     nvar = length(info["variable"]);
 

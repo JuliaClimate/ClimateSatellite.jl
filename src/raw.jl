@@ -141,7 +141,7 @@ function clisatrawregion(
     dvec,dys,dyf,ndy = clisatextractdate(start,finish);
     nt = info["dayfreq"]; ndates = length(dvec);
 
-    lon,lat = clisatlonlat(info); rlon,rlat,rinfo = regiongridvec(region,lon,lat);
+    lon,lat = clisatlonlat(info); rlon,rlat,rinfo = gregiongridvec(region,lon,lat);
     nlon = length(rlon); nlat = length(rlat);
     data = zeros(Int16,nlon,nlat,ndy*nt);
 
@@ -211,7 +211,7 @@ function clisatrawpoint(
     dvec,dys,dyf,ndy = clisatextractdate(start,finish);
     nt = info["dayfreq"]; ndates = length(dvec);
 
-    lon,lat = clisatlonlat(info); rlon,rlat,rinfo = regiongridvec(region,lon,lat);
+    lon,lat = clisatlonlat(info); rlon,rlat,rinfo = gregiongridvec(region,lon,lat);
     plon,plat = coord; ilon,ilat = regionpoint(plon,plat,rlon,rlat);
     data = zeros(Int16,ndy*nt);
 
@@ -282,7 +282,7 @@ function clisatrawgrid(
     nt = info["dayfreq"]; ndates = length(dvec);
 
     lon,lat = clisatlonlat(info); isgridinregion(grid,region);
-    rlon,rlat,rinfo = regiongridvec(region,lon,lat);
+    rlon,rlat,rinfo = gregiongridvec(region,lon,lat);
     glon,glat,ginfo = regiongridvec(grid,rlon,rlat); iWE,iNS = ginfo["IDvec"];
     nlon = length(glon); nlat = length(glat);
     data = zeros(Int16,nlon,nlat,ndy*nt);

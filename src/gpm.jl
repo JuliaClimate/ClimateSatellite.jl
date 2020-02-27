@@ -119,7 +119,7 @@ function gpmextract(
     reg::AbstractString="GLB"
 )
 
-    lon,lat = gpmlonlat(); rlon,rlat,rinfo = regiongridvec(reg,lon,lat);
+    lon,lat = gpmlonlat(); rlon,rlat,rinfo = gregiongridvec(reg,lon,lat);
     nlon = length(lon); nrlon = length(rlon);
     nlat = length(lat); nrlat = length(rlat);
     nt   = length(fH5); rtime = convert(Array,1:nt) * 30; tunit = "minutes";
