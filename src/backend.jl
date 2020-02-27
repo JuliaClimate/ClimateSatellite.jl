@@ -56,10 +56,10 @@ function clisattmpfol(info::Dict)
 end
 
 ## DateString Aliasing
-function yrmo2dir(date::TimeType) = Dates.format(date,dateformat"yyyy/mm") end
-function yrmo2str(date::TimeType) = Dates.format(date,dateformat"yyyymm") end
-function yr2str(date::TimeType)   = Dates.format(date,dateformat"yyyy") end
-function ymd2str(date::TimeType)  = Dates.format(date,dateformat"yyyymmdd") end
+yrmo2dir(date::TimeType) = Dates.format(date,dateformat"yyyy/mm")
+yrmo2str(date::TimeType) = Dates.format(date,dateformat"yyyymm")
+yr2str(date::TimeType)   = Dates.format(date,dateformat"yyyy")
+ymd2str(date::TimeType)  = Dates.format(date,dateformat"yyyymmdd")
 
 ## Real2Integer Conversion for Packing
 function real2int16!(
