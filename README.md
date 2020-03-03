@@ -12,7 +12,7 @@ A Julia Package that downloads climate data from various satellite missions.  Yo
 ## Overview
 `ClimateSatellite.jl` contains scripts and functions to download satellite measurements and
 observations of climate data.  It can be configured to download data for specific regions
-as defined in the `ClimateEasy.jl` dependency.
+as defined in the `GeoRegions.jl` dependency.
 
 Since my research work focuses mainly on precipitation and water vapour research, my efforts
 will mostly be on satellite missions involving these variables (i.e. PMM (GPM/TRMM) and MIMIC-TPW2m).  However, if you are interested in adding scripts for additional missions, feel free to submit a pull request.
