@@ -4,7 +4,8 @@ module ClimateSatellite
 # variables from various satellite instruments
 
 ## Modules Used
-using Dates, Printf, DelimitedFiles, Statistics
+using Logging, Dates
+using DelimitedFiles, Printf, Statistics
 using NCDatasets, HDF5, FTPClient
 using GeoRegions
 
