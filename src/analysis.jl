@@ -21,8 +21,8 @@ as the datasets become larger and larger.
 """
 
 function clisatopNaN(f::Function,data::Vector{Int16})
-    data = data[data.!=-32768];
-    if data != []; return f(data); else; return -32768; end
+    ndata = @view data[data.!=-32768];
+    if ndata != []; return f(ndata); else; return -32768; end
 end
 
 function clisatanalysis(
@@ -66,7 +66,7 @@ function clisatanalysis(
         @debug "$(Dates.now()) - Extracting hourly information for each month ..."
         for it = 1 : nt-1, ilat = 1 : nlat, ilon = 1 : nlon
 
-            rawii = raw[ilon,ilat,it,:]; rawii = rawii[rawii.!=-32768];
+            rawii = @view raw[ilon,ilat,it,:]; rawii = @view rawii[rawii.!=-32768];
 
             if rawii != [];
                 davg[ilon,ilat,it,mo] = round(Int16,mean(rawii));
@@ -87,7 +87,8 @@ function clisatanalysis(
         @debug "$(Dates.now()) - Averaging diurnal data into daily data ..."
         for idy = 1 : ndy, ilat = 1 : nlat, ilon = 1 : nlon
 
-            tmpii = raw[ilon,ilat,idy,:]; tmpii = tmpii[tmpii.!=-32768];
+            tmpii = @view raw[ilon,ilat,idy,:]; tmpii = @view tmpii[tmpii.!=-32768];
+
             if tmpii != [];
                 drg[ilon,ilat,idy] = maximum(tmpii)/2 - minimum(tmpii)/2;
                 dmn[ilon,ilat,idy] = mean(tmpii);
@@ -101,8 +102,8 @@ function clisatanalysis(
         @debug "$(Dates.now()) - Extracting information on monthly climatology and diurnal variability ..."
         for ilat = 1 : nlat, ilon = 1 : nlon;
 
-            dmnii = dmn[ilon,ilat,:]; dmnii = dmnii[dmnii.!=-32768];
-            drgii = drg[ilon,ilat,:]; drgii = drgii[drgii.!=-32768];
+            dmnii = @view dmn[ilon,ilat,:]; dmnii = @view dmnii[dmnii.!=-32768];
+            drgii = @view drg[ilon,ilat,:]; drgii = @view drgii[drgii.!=-32768];
 
             davg[ilon,ilat,nt,mo] = round.(Int16,mean(dmnii));
             dstd[ilon,ilat,nt,mo] = round.(Int16,std(dmnii));
