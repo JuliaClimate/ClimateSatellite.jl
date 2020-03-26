@@ -171,7 +171,7 @@ function gpmdwn(
     tdir = clisattmpfol(info); if !isdir(tdir) mkpath(tdir); end; gpmh5!(info)
     fH5 = gpmh5list(date,info); gpmretrieve(fH5,date,tdir,info,overwrite);
 
-    for reg in regions
+    for reg in regions; isgeoregion(reg);
         data,grid = gpmextract(fH5,tdir,info,reg); clisatrawsave(data,grid,reg,info,date)
     end
 

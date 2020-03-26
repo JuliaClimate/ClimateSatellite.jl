@@ -34,6 +34,7 @@ function clisatanalysis(
     if path == ""; dataroot = clisatroot(productID);
     else;          dataroot = clisatroot(productID,path);
     end
+    isgeoregion(region);
 
     info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
     clisatvarinfo!(info,productID,varname=varname);

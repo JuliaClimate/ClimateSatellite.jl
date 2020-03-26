@@ -8,10 +8,11 @@ function clisatsubregion(
     if path == ""; dataroot = clisatroot(productID);
     else;          dataroot = clisatroot(productID,path);
     end
+    rinfo = gregioninfoload(); isgeoregion(region,rinfo);
 
     info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
 
-    parent = gregionparent(region);
+    parent = gregionparent(region); isgeoregion(parent,rinfo);
 
     @info "$(Dates.now()) - Extracting $(info["source"]) $(info["product"]) data for the entire $(gregionfullname(region)) region ..."
 

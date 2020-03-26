@@ -114,7 +114,7 @@ function mimicdwn(
     tdir = clisattmpfol(info); if !isdir(tdir) mkpath(tdir); end
     fname,furl = mimicnclist(date); mimicretrieve(fname,furl,date,tdir,info,overwrite);
 
-    for reg in regions
+    for reg in regions; isgeoregion(reg);
         data,grid = mimicextract(fname,tdir,info,reg);
         clisatrawsave(data,grid,reg,info,date)
     end

@@ -128,6 +128,7 @@ function clisatrawregion(
     if path == ""; dataroot = clisatroot(productID);
     else;          dataroot = clisatroot(productID,path);
     end
+    isgeoregion(region);
 
     info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
 
@@ -194,6 +195,7 @@ function clisatrawpoint(
     if path == ""; dataroot = clisatroot(productID);
     else;          dataroot = clisatroot(productID,path);
     end
+    isgeoregion(region);
 
     if length(coord) != 2
         error("$(Dates.now()) - Coordinate vector must be in the form [lon,lat]")
@@ -264,6 +266,7 @@ function clisatrawgrid(
     if path == ""; dataroot = clisatroot(productID);
     else;          dataroot = clisatroot(productID,path);
     end
+    isgeoregion(region);
 
     if length(grid) != 4
         error("$(Dates.now()) - Grid vector must be in the form [N,S,E,W]")
