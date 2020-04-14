@@ -172,6 +172,8 @@ function clisatrawregion(
             data[:,:,ibeg:iend] = vds.var[:];
         end
 
+        close(ds);
+
     end
 
     @info "$(Dates.now()) - $(info["source"]) $(info["product"]) data for the entire $(gregionfullname(region)) region has been extracted."
@@ -242,6 +244,8 @@ function clisatrawpoint(
             ibeg = iend+1; iend = ibeg-1 + moday*nt;
             data[ibeg:iend] = vds.var[ilon,ilat,:];
         end
+
+        close(ds);
 
     end
 
@@ -315,6 +319,8 @@ function clisatrawgrid(
             ibeg = iend+1; iend = ibeg-1 + moday*nt;
             data[:,:,ibeg:iend] = vds.var[iWE,iNS,:];
         end
+
+        close(ds);
 
     end
 

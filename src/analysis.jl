@@ -63,6 +63,7 @@ function clisatanalysis(
         ncraw = clisatrawname(productID,Date(yr,mo),region);
         ds = Dataset(ncraw,"r"); vds = ds[varname];
         raw = reshape(vds.var[:],nlon,nlat,(nt-1),ndy);
+        close(ds);
 
         @debug "$(Dates.now()) - Extracting hourly information for each month ..."
         for it = 1 : nt-1, ilat = 1 : nlat, ilon = 1 : nlon
