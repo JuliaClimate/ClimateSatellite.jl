@@ -192,8 +192,8 @@ function clisatanasave(
     att_lon = Dict("units"=>"degrees_east","long_name"=>"longitude");
     att_lat = Dict("units"=>"degrees_north","long_name"=>"latitude");
 
-    defVar(ds,"longitude",rlon,("longitude",),attrib=att_lon)
-    defVar(ds,"latitude",rlat,("latitude",),attrib=att_lat)
+    dlon = defVar(ds,"longitude",Float32,("longitude",),attrib=att_lon); dlon[:] = rlon;
+    dlat = defVar(ds,"latitude",Float32,("latitude",),attrib=att_lat);   dlat[:] = rlat;
 
     @debug "$(Dates.now()) - Saving analyzed $(info["source"]) $(info["product"]) data for $yr to NetCDF file $(fnc) ..."
 
