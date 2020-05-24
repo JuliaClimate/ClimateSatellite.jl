@@ -1,15 +1,22 @@
+
 # **<div align="center">ClimateSatellite.jl</div>**
 
-<!-- Information badges -->
 <p align="center">
   <a href="https://www.repostatus.org/#active">
     <img alt="Repo Status" src="https://www.repostatus.org/badges/latest/active.svg?style=flat-square" />
   </a>
+  <a href="https://travis-ci.com/github/JuliaClimate/ClimateSatellite.jl">
+    <img alt="Travis CI" src="https://travis-ci.com/JuliaClimate/ClimateSatellite.jl.svg?branch=master&style=flat-square">
+  </a>
+  <a href="https://github.com/JuliaClimate/ClimateSatellite.jl/actions?query=workflow%3ADocumentation">
+    <img alt="Documentation Build" src="https://github.com/JuliaClimate/ClimateSatellite.jl/workflows/Documentation/badge.svg">
+  </a>
+  <br>
   <a href="https://mit-license.org">
     <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square">
   </a>
-  <a href="https://github.com/JuliaClimate/ClimateSatellite.jl/workflows/Documentation/badge.svg">
-    <img alt="Documentation Build" src="https://github.com/JuliaClimate/ClimateSatellite.jl/actions?query=workflow%3ADocumentation">
+  <a href="https://juliaclimate.github.io/ClimateSatellite.jl/stable/">
+    <img alt="Latest Documentation" src="https://img.shields.io/badge/docs-stable-blue.svg?style=flat-square">
   </a>
   <a href="https://juliaclimate.github.io/ClimateSatellite.jl/dev/">
     <img alt="Latest Documentation" src="https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square">
