@@ -27,7 +27,10 @@ function clisatroot(productID::AbstractString)
 
 end
 
-function clisatroot(productID::AbstractString,path::AbstractString)
+function clisatroot(
+    productID::AbstractString, path::AbstractString;
+    create::Bool=false
+)
 
     pdir = joinpath(path,productID);
 
@@ -40,7 +43,13 @@ function clisatroot(productID::AbstractString,path::AbstractString)
 
     else
 
-        error("$(Dates.now()) - The path $(path) does not exist.  If you already have an existing repository for ClimateSatellite data, make sure that $(path) is the correct location.")
+        if create
+            @warn "$(Dates.now()) - The path $(path) does not exist.  A new directory will be created here.  Therefore if you already have an existing repository for ClimateSatellite data, make sure that $(path) is the correct location."
+            @info "$(Dates.now()) - Creating path $(pdir) ..."
+            mkpath(pdir);
+        else
+            error("$(Dates.now()) - The path $(path) does not exist.  If you already have an existing repository for ClimateSatellite data, make sure that $(path) is the correct location.")
+        end
 
     end
 
