@@ -1,11 +1,6 @@
 using Documenter
 using ClimateSatellite
 
-format = Documenter.HTML(
-    collapselevel = 1,
-       prettyurls = get(ENV,"CI",nothing) == "true"
-)
-
 makedocs(
     modules  = [ClimateSatellite],
     doctest  = false,
@@ -18,9 +13,10 @@ makedocs(
     pages    = [
         "Home"      => "index.md",
         "Tutorials" => [
-            "Basic Downloading"    => "tutorials/downloads.md",
-            "Preliminary Analysis" => "tutorials/analysis.md",
-            "Using GeoRegions"     => "tutorials/georegions.md"
+            "Data Downloads"       => "tutorials/downloads.md",
+            "Using GeoRegions"     => "tutorials/georegions.md",
+            # "Region Extraction"    => "tutorials/extract.md",
+            # "Preliminary Analysis" => "tutorials/analysis.md"
         ]
     ]
 )

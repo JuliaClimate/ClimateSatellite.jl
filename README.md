@@ -1,4 +1,3 @@
-
 # **<div align="center">ClimateSatellite.jl</div>**
 
 <p align="center">
@@ -15,6 +14,7 @@
   <a href="https://mit-license.org">
     <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square">
   </a>
+  <img alt="MIT License" src="https://img.shields.io/github/v/release/JuliaClimate/ClimateSatellite.jl">
   <a href="https://juliaclimate.github.io/ClimateSatellite.jl/stable/">
     <img alt="Latest Documentation" src="https://img.shields.io/badge/docs-stable-blue.svg?style=flat-square">
   </a>
