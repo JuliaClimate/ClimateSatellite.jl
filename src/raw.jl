@@ -14,7 +14,7 @@ Current functionalities stored in this file include:
 
 function clisatdownload(
     productID::AbstractString, date::TimeType;
-    email::AbstractString, path::AbstractString="",
+    email::AbstractString="", path::AbstractString="",
     regions::Array{<:AbstractString,1}=["GLB"],
     overwrite::Bool=false
 )
@@ -26,12 +26,12 @@ function clisatdownload(
     info = Dict{Any,Any}("root"=>dataroot,"email"=>replace(email,"@"=>"%40"));
     clisatinfo!(info,productID);
 
-    if info["source"] == "PMM"
+    if info["source"] == "PMM"; checkemail(email)
         if     isprod(info,"gpm");  gpmdwn(regions,date,info,overwrite=overwrite);
         elseif isprod(info,"3b42"); trmmdwn(regions,date,info,overwrite=overwrite);
         end
     elseif info["source"] == "MIMIC"; mimicdwn(regions,date,info,overwrite=overwrite);
-    elseif info["source"] == "RSS"
+    elseif info["source"] == "RSS"; checkemail(email)
         if     isprod(info,"trmm"); rtmidwn(regions,date,info,email,overwrite=overwrite);
         elseif isprod(info,"gpm");  rgmidwn(regions,date,info,email,overwrite=overwrite);
         elseif isprod(info,"smif"); rsmidwn(regions,date,info,email,overwrite=overwrite);

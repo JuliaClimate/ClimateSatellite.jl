@@ -91,3 +91,10 @@ function real2int16!(
     return
 
 end
+
+## Check email
+function checkemail(email::AbstractString)
+    if email == ""
+        error("$(Dates.now()) - Usage of this dataset requires an email address for login.  However, no email was provided.")
+    end
+end
