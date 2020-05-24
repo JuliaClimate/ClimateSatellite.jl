@@ -1,4 +1,28 @@
-.DS_Store
-/Manifest.toml
-/dev/
-/.ipynb_checkpoints/
+# Julia stuff
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+*.mem
+deps/deps.jl
+
+# Documenter.jl and MkDocs
+docs/build
+docs/site
+docs/src/generated
+
+# Data Files
+*.dat
+*.nc
+*.jld2
+
+# Plots
+*.png
+*.gif
+*.mp4
+
+# Jupyter Lab stuff and notebooks
+*.ipynb
+.ipynb_checkpoints
+
+# MacOS stuff
+*.DS_Store

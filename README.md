@@ -1,5 +1,21 @@
 # **<div align="center">ClimateSatellite.jl</div>**
 
+<!-- Information badges -->
+<p align="center">
+  <a href="https://www.repostatus.org/#active">
+    <img alt="Repo Status" src="https://www.repostatus.org/badges/latest/active.svg?style=flat-square" />
+  </a>
+  <a href="https://mit-license.org">
+    <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square">
+  </a>
+  <a href="https://github.com/JuliaClimate/ClimateSatellite.jl/workflows/Documentation/badge.svg">
+    <img alt="Documentation Build" src="https://github.com/JuliaClimate/ClimateSatellite.jl/actions?query=workflow%3ADocumentation">
+  </a>
+  <a href="https://juliaclimate.github.io/ClimateSatellite.jl/dev/">
+    <img alt="Latest Documentation" src="https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square">
+  </a>
+</p>
+
 **Created By:** Nathanael Wong (nathanaelwong@fas.harvard.edu)
 
 **Developer To-Do for v1.0:**
