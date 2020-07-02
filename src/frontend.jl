@@ -237,6 +237,24 @@ function clisatananame(
     return "$(info["short"])-$(varname)-ana-$(region)-$(yr2str(date)).nc"
 end
 
+## Read NetCDF Files
+
+function clisatrawread(
+    productID::AbstractString, varname::AbstractString,
+    date::TimeType, region::AbstractString;
+    path::AbstractString=""
+)
+
+    rfol = clisatrawname(productID,date,region)
+    rfnc = clisatrawfol(productID,date,region,path=path)
+    rds  = Dataset(joinpath(rfol,rfnc));
+
+    return rds,rds[varname]
+
+end
+
+## Get Longitude / Latitude
+
 function clisatlonlat(info::Dict)
 
     if info["source"] == "PMM"
