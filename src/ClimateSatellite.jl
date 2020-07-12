@@ -18,6 +18,7 @@ using Statistics
 export
         clisatroot, clisatlonlat, clisatinfo!, clisatdownload, clisatanalysis,
         clisatrawregion, clisatrawpoint, clisatrawgrid, clisatrawfol, clisatrawname,
+        clisatrawread,
         clisatanaregion, clisatanapoint, clisatanagrid, clisatanafol, clisatananame,
         clisatsubregion,
         gpmdwn, gpmlonlat,

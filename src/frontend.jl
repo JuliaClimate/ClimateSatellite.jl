@@ -245,8 +245,8 @@ function clisatrawread(
     path::AbstractString=""
 )
 
-    rfol = clisatrawname(productID,date,region)
-    rfnc = clisatrawfol(productID,date,region,path=path)
+    rfol = clisatrawfol(productID,date,region,path=path)
+    rfnc = clisatrawname(productID,date,region)
     rds  = Dataset(joinpath(rfol,rfnc));
 
     return rds,rds[varname]
