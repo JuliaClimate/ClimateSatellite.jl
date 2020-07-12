@@ -20,7 +20,8 @@ export
         clisatrawregion, clisatrawpoint, clisatrawgrid, clisatrawfol, clisatrawname,
         clisatanaregion, clisatanapoint, clisatanagrid, clisatanafol, clisatananame,
         clisatsubregion,
-        gpmdwn, mimicdwn
+        gpmdwn, gpmlonlat,
+        mimicdwn, mimiclonlat
 
 ## Including other files in the module
 include("frontend.jl")
