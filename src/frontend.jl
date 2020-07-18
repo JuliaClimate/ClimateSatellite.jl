@@ -29,14 +29,14 @@ end
 
 function clisatroot(
     productID::AbstractString, path::AbstractString;
-    create::Bool=false
+    create::Bool=false, loginfo::Bool=true
 )
 
     pdir = joinpath(path,productID);
 
     if isdir(path)
 
-        @info "$(Dates.now()) - The path $(path) exists and therefore can be used as a directory for ClimateSatellite data downloads."
+        if loginfo; @info "$(Dates.now()) - The path $(path) exists and therefore can be used as a directory for ClimateSatellite data downloads." end
         if !isdir(pdir);
             @info "$(Dates.now()) - Creating path $(pdir) ..." mkpath(pdir);
         end
@@ -151,11 +151,11 @@ end
 
 function clisatrawfol(
     productID::AbstractString,date::TimeType,region::AbstractString;
-    path::AbstractString=""
+    path::AbstractString="",loginfo::Bool=true
 )
 
     if path == ""; dataroot = clisatroot(productID);
-    else;          dataroot = clisatroot(productID,path);
+    else;          dataroot = clisatroot(productID,path,loginfo=loginfo);
     end
 
     fol = joinpath(dataroot,region,"raw",yr2str(date));
@@ -183,11 +183,11 @@ end
 
 function clisatanafol(
     productID::AbstractString,region::AbstractString;
-    path::AbstractString=""
+    path::AbstractString="",loginfo::Bool=true
 )
 
     if path == ""; dataroot = clisatroot(productID);
-    else;          dataroot = clisatroot(productID,path);
+    else;          dataroot = clisatroot(productID,path,loginfo=loginfo);
     end
 
     fol = joinpath(dataroot,region,"ana");
@@ -245,7 +245,7 @@ function clisatrawread(
     path::AbstractString=""
 )
 
-    rfol = clisatrawfol(productID,date,region,path=path)
+    rfol = clisatrawfol(productID,date,region,path=path,loginfo=false)
     rfnc = clisatrawname(productID,date,region)
     rds  = Dataset(joinpath(rfol,rfnc));
 
