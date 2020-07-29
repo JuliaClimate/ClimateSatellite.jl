@@ -17,9 +17,11 @@ using Statistics
 ## Exporting the following functions:
 export
         clisatroot, clisatlonlat, clisatinfo!, clisatdownload, clisatanalysis,
-        clisatrawregion, clisatrawpoint, clisatrawgrid, clisatrawfol, clisatrawname,
-        clisatrawread,
-        clisatanaregion, clisatanapoint, clisatanagrid, clisatanafol, clisatananame,
+        clisatrawfol, clisatrawname, clisatrawread,
+        clisatanafol, clisatananame, clisatanaread,
+        clisatcmpfol, clisatcmpname, clisatcmpread,
+        clisatrawregion, clisatrawpoint, clisatrawgrid,
+        clisatanaregion, clisatanapoint, clisatanagrid,
         clisatsubregion,
         gpmdwn, gpmlonlat,
         mimicdwn, mimiclonlat

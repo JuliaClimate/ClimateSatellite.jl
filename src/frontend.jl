@@ -237,7 +237,31 @@ function clisatananame(
     return "$(info["short"])-$(varname)-ana-$(region)-$(yr2str(date)).nc"
 end
 
+function clisatcmpname(
+    productID::AbstractString, varname::AbstractString, region::AbstractString
+)
+    return "$(productID)-$(varname)-cmp-$(region).nc"
+end
+
+function clisatcmpname(
+    info::Dict, varname::AbstractString, region::AbstractString
+)
+    return "$(info["short"])-$(varname)-cmp-$(region).nc"
+end
+
 ## Read NetCDF Files
+
+function clisatrawread(
+    varname::AbstractString, date::TimeType, region::AbstractString, info::AbstractDict
+)
+
+    rfol = clisatrawfol(info,date,region)
+    rfnc = clisatrawname(info,date,region)
+    rds  = Dataset(joinpath(rfol,rfnc));
+
+    return rds,rds[varname]
+
+end
 
 function clisatrawread(
     productID::AbstractString, varname::AbstractString,
@@ -250,6 +274,59 @@ function clisatrawread(
     rds  = Dataset(joinpath(rfol,rfnc));
 
     return rds,rds[varname]
+
+end
+
+function clisatanaread(
+    productID::AbstractString, varname::AbstractString, anavar::AbstractString,
+    date::TimeType, region::AbstractString;
+    path::AbstractString=""
+)
+
+    afol = clisatanafol(productID,region,path=path,loginfo=false)
+    afnc = clisatananame(productID,varname,date,region)
+    ads  = Dataset(joinpath(afol,afnc));
+
+    return ads,ads[anavar]
+
+end
+
+function clisatanaread(
+    varname::AbstractString, anavar::AbstractString,
+    date::TimeType, region::AbstractString, info::AbstractDict
+)
+
+    afol = clisatanafol(info,region)
+    afnc = clisatananame(info,varname,date,region)
+    ads  = Dataset(joinpath(afol,afnc));
+
+    return ads,ads[anavar]
+
+end
+
+function clisatcmpread(
+    productID::AbstractString, varname::AbstractString, cmpvar::AbstractString,
+    region::AbstractString; path::AbstractString=""
+)
+
+    afol = clisatanafol(productID,date,region,path=path,loginfo=false)
+    cfnc = clisatcmpname(productID,varname,region)
+    cds  = Dataset(joinpath(afol,cfnc));
+
+    return cds,cds[cmpvar]
+
+end
+
+function clisatcmpread(
+    varname::AbstractString, cmpvar::AbstractString,
+    region::AbstractString, info::AbstractDict
+)
+
+    afol = clisatanafol(info,region)
+    cfnc = clisatcmpname(info,varname,region)
+    cds  = Dataset(joinpath(afol,cfnc));
+
+    return cds,cds[cmpvar]
 
 end
 
