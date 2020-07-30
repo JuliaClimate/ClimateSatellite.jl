@@ -16,7 +16,8 @@ using Statistics
 
 ## Exporting the following functions:
 export
-        clisatroot, clisatlonlat, clisatinfo!, clisatdownload, clisatanalysis,
+        clisatroot, clisatlonlat, clisatinfo!,
+        clisatdownload, clisatanalysis, clisatcompile,
         clisatrawfol, clisatrawname, clisatrawread,
         clisatanafol, clisatananame, clisatanaread,
         clisatcmpfol, clisatcmpname, clisatcmpread,
@@ -31,6 +32,7 @@ include("frontend.jl")
 include("backend.jl")
 include("raw.jl")
 include("analysis.jl")
+include("compile.jl")
 include("extract.jl")
 include("gpm.jl")
 include("mimic.jl")
