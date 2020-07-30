@@ -14,9 +14,9 @@ function clisatcompile(
 
     info = Dict{Any,Any}("root"=>dataroot); clisatinfo!(info,productID);
     clisatvarinfo!(info,productID,varname=varname);
-    lon,lat = gpmlonlat(); rlon,rlat,_ = gregiongridvec(regID,lon,lat)
+    lon,lat = gpmlonlat(); rlon,rlat,_ = gregiongridvec(region,lon,lat)
     grid = [rlon,rlat]; nlon = length(rlon); nlat = length(rlat)
-    yrmin = minimum(trange); yrmax = maximum(trange); nt = length(yrmin:yrmax)
+    yrmin = minimum(trange); yrmax = maximum(trange); nt = length(yrmin:yrmax); it = 0;
 
     @info "$(Dates.now()) - Preallocating arrays ..."
     csavg = zeros(nlon,nlat,nt); csrng = zeros(nlon,nlat,nt);
@@ -87,12 +87,12 @@ function clisatcmpsave(
     csavg::Array{<:Real,2}, csdhr::Array{<:Real,2},
     csitr::Array{<:Real,2}, cssea::Array{<:Real,2}, csian::Array{<:Real,2},
     varname::AbstractString,
-    region::AbstractString, grid::Vector{<:Any}, info::AbstractDitc
+    region::AbstractString, grid::Vector{<:Any}, info::AbstractDict
 )
 
-    @info "$(Dates.now()) - Saving compiled $(info["source"]) $(info["product"]) data for the year $yr in $(gregionfullname(region)) ..."
+    @info "$(Dates.now()) - Saving compiled $(info["source"]) $(info["product"]) data for $(gregionfullname(region)) ..."
 
-    cfol = clisatanafolder(info,region);
+    cfol = clisatanafol(info,region);
     fcmp = clisatcmpname(info,varname,region);
     cfnc = joinpath(cfol,fcmp);
 
@@ -135,9 +135,9 @@ function clisatcmpsave(
 
     ncsea = defVar(ds,"variability_seasonal",Float32,("longitude","latitude"),
         attrib = Dict(
-            "long_name" => info["variable"],`
+            "long_name" => info["variable"],
             "full_name" => info["standard"],
-            "units"     => info["units"],`
+            "units"     => info["units"],
     ))
 
     ncitr = defVar(ds,"variability_intraseasonal",Float32,("longitude","latitude"),
