@@ -25,8 +25,7 @@
 
 **Created By:** Nathanael Wong (nathanaelwong@fas.harvard.edu)
 
-**Developer To-Do for v1.0:**
-* [ ] Comprehensive documentation and Jupyter notebook examples
+**Note:** I am currently working on a new package, [NASAPrecipitation.jl](https://github.com/natgeo-wong/NASAPrecipitation.jl), that contains most of the current functionality (except MIMIC), and aims to expand to maybe the other datasets available from the NASA Precipitation Measurement Mission.  This repository is not currently being developed further, thought this may change in the future as more satellite datasets become relevant to my research.
 
 ## **Introduction**
 
